@@ -1018,13 +1018,13 @@ Function establishOnPremisesCredentials
 	{
 		If ($?) 
 		{
-			Write-LogInfo -LogPath $script:sLogFile -Message 'The on premises credentials file was imported successfully.' -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message 'The on premises credentials were successfully obtained.' -toscreen
 			Write-LogInfo -LogPath $script:sLogFile -Message ' ' -toscreen
 		}
 		else
 		{
 
-			Write-LogError -LogPath $script:sLogFile -Message "The on premises credential file could not be imported - exiting." -toscreen
+			Write-LogError -LogPath $script:sLogFile -Message "The on premises credential were not successfully obtained." -toscreen
 			Write-LogError -LogPath $script:sLogFile -Message $error[0] -toscreen
 			cleanupSessions
 			Stop-Log -LogPath $script:sLogFile -ToScreen
@@ -1068,7 +1068,15 @@ Function establishOffice365Credentials
 	{
 		Try 
 		{
-            $script:office365Credential = Import-Clixml -Path $script:office365CredentialFile #create the credential variable for Office 365.
+			If ( $requireInteractiveCredentials -eq $FALSE )
+			{
+				$script:office365Credential = Import-Clixml -Path $script:office365CredentialFile #create the credential variable for Office 365.
+			}
+			Else
+			{
+				$script:office365Credential = Get-Credential -Message "Please input global administrator credentials for Office 365:"
+			}
+            
 		}
 		Catch 
 		{
@@ -1082,13 +1090,13 @@ Function establishOffice365Credentials
 	{
 		If ($?) 
 		{
-			Write-LogInfo -LogPath $script:sLogFile -Message 'The Office 365 credentials file was imported successfully.' -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message 'The Office 365 credentials were successfully obtained.' -toscreen
 			Write-LogInfo -LogPath $script:sLogFile -Message ' ' -toscreen
 		}
 		else
 		{
 
-			Write-LogError -LogPath $script:sLogFile -Message "The Office 365 credential file could not be imported - exiting." -toscreen
+			Write-LogError -LogPath $script:sLogFile -Message "The Office 365 credentials were not successfully obtained." -toscreen
 			Write-LogError -LogPath $script:sLogFile -Message $error[0] -toscreen
 			cleanupSessions
 			Stop-Log -LogPath $script:sLogFile -ToScreen
