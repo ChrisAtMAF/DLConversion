@@ -166,11 +166,11 @@ Param (
 	[Parameter(Mandatory=$FALSE,Position=5)]
 	[boolean]$convertToContact=$TRUE,
 	[Parameter(Mandatory=$TRUE,Position=6)]
-	[boolean]$retainOnPremisesSettings=$TRUE,
+	[boolean]$retainOnPremisesSettings=$True,
 	[Parameter(Mandatory=$TRUE,Position=7)]
-	[boolean]$requireInteractiveCredentials=$FALSE,
+	[boolean]$retainO365CloudOnlySettings=$FALSE,
 	[Parameter(Mandatory=$TRUE,Position=8)]
-	[boolean]$retainO365CloudOnlySettings=$FALSE
+	[boolean]$requireInteractiveCredentials=$FALSE
 )
 
 #---------------------------------------------------------[Initialisations]--------------------------------------------------------
@@ -467,6 +467,93 @@ Random - randomly cycle through a list of console colors
         }
     } #end
 } #end function
+
+<#
+*******************************************************************************************************
+
+Function recordCommandLineOptions
+
+.DESCRIPTION
+
+This function writes out all the specified and default paramters for the script.
+
+.PARAMETER <Parameter_Name>
+
+NONE
+
+.INPUTS
+
+NONE
+
+.OUTPUTS 
+
+NONE
+
+*******************************************************************************************************
+#>
+
+Function recordCommandLineOptions
+{
+	Param ()
+
+	Begin 
+	{
+	    Write-LogInfo -LogPath $script:sLogFile -Message 'This function writes all command line options to the log. ....' -toscreen
+	}
+	Process 
+	{
+		Try 
+		{
+			Write-LogInfo -LogPath $script:sLogFile -Message "DL To Convert" -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message $dlToConvert -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message "Ignore Invalid DL Member" -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message $ignoreInvalidDLMember -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message "Ignore Invalid Managed By" -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message $ignoreInvalidManagedByMember -toscreen
+			if ( $groupTypeOverride -ne $NULL )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message "Group Type Override" -toscreen
+				Write-LogInfo -LogPath $script:sLogFile -Message $groupTypeOverride -toscreen
+			}
+			else 
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message "Group Type Override NULL" -toscreen
+			}
+			Write-LogInfo -LogPath $script:sLogFile -Message "Covert To Contact" -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message $convertToContact -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message "Retain On Premises Settings" -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message $retainOnPremisesSettings -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message "Retain O365 Cloud Settings" -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message $retainO365CloudOnlySettings -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message "Require Interactive Credentials" -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message $requireInteractiveCredentials -toscreen
+			
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+	}
+	End 
+	{
+		If ($?) 
+		{
+			Write-LogInfo -LogPath $script:sLogFile -Message 'The on premises credentials were successfully obtained.' -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message ' ' -toscreen
+		}
+		else
+		{
+
+			Write-LogError -LogPath $script:sLogFile -Message "The on premises credential were not successfully obtained." -toscreen
+			Write-LogError -LogPath $script:sLogFile -Message $error[0] -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+		}
+	}
+}
 
 <#
 *******************************************************************************************************
@@ -3941,7 +4028,7 @@ Function recordMovedOriginalDistributionGroupProperties
 	{
 		Try 
 		{
-			Write-LogInfo -LogPath $script:sLogFile -Message 'Invoking AD call to domain controller to pull membership of the group on premises...' -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Recording moved DL configuration...' -toscreen
 
 			$script:onPremisesMovedDLConfiguration = get-distributionGroup -identity $dlToConvert -domaincontroller $script:adDomainController
 		
@@ -5358,6 +5445,8 @@ Function recordOriginalO365MultivaluedAttributes
 New-Item -ItemType Directory -Path $script:sLogPath -Force
 
 Start-Log -LogPath $script:sLogPath -LogName $script:sLogName -ScriptVersion $script:sScriptVersion -ToScreen
+
+recordCommandLineOptions #Records the command line options specified in the command call.
 
 establishOnPremisesCredentials  #Function call to import and populate on premises credentials.
 
