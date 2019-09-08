@@ -133,6 +133,10 @@ When this switch is utilized as FALSE - if the migrated group was set on any oth
 these settings are lost.  This increases script execution time - but also results in potentially loosing effective permissions or group memberships on premises.
 Recommendations to only utilize this switch when a simple distribution group is being migrated.
 
+Version:		1.7
+Author:			Timothy J. McMichael
+Purpose/Change:	In this version we implement a swtich allowing for credentials to be supplied in an interactive fashion.  This prevents having to supply credentials within the XML file.
+
   
 .EXAMPLE
 
@@ -157,6 +161,8 @@ Param (
 	[boolean]$convertToContact=$TRUE,
 	[Parameter(Mandatory=$TRUE,Position=6)]
 	[boolean]$retainOnPremisesSettings=$TRUE
+	[Parameter(Mandatory=$TRUE,Position=7)]
+	[boolean]$requireInteractiveCredentials=$FALSE
 )
 
 #---------------------------------------------------------[Initialisations]--------------------------------------------------------
@@ -988,7 +994,17 @@ Function establishOnPremisesCredentials
 	{
 		Try 
 		{
-            $script:onPremisesCredential = Import-Clixml -Path $script:onPremisesCredentialFile #create the credential variable for local Exchange.
+			#If the user requires interactive credentials - skip XML and gather credentials.
+			
+			If ( $requireInteractiveCredentials -eq $FALSE )
+			{
+				$script:onPremisesCredential = Import-Clixml -Path $script:onPremisesCredentialFile #create the credential variable for local Exchange.
+			}
+			Else 
+			{
+				$script:onPremisesCredential = Get-Credential -Message "Please input on premises domain admin and exchange org admin credentials:"
+			}
+            
 		}
 		Catch 
 		{
