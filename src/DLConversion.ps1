@@ -305,10 +305,10 @@ $script:remoteRoutingAddress = $NULL
 $script:wellKnownSelfAccountSid = "S-1-5-10"
 $script:onPremisesNewContactConfiguration = $NULL
 
-$script:arrayCounter=0
-$script:arrayGUID=$NULL
+$script:arrayCounter=0	#Counter used to build arrays for the recipient arrays.
+$script:arrayGUID=$NULL	#Global used to store the recipient GUIDs to normalize objects.
 
-$script:newDynamicDLAddress
+$script:newDynamicDLAddress	#Primary SMTP address built for the dynamic distribution list.
 
 #-----------------------------------------------------------[Functions]------------------------------------------------------------
 
