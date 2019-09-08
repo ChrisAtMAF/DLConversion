@@ -510,14 +510,14 @@ Function recordCommandLineOptions
 			Write-LogInfo -LogPath $script:sLogFile -Message $ignoreInvalidDLMember -toscreen
 			Write-LogInfo -LogPath $script:sLogFile -Message "Ignore Invalid Managed By" -toscreen
 			Write-LogInfo -LogPath $script:sLogFile -Message $ignoreInvalidManagedByMember -toscreen
-			if ( $groupTypeOverride -ne $NULL )
+			if ( $groupTypeOverride.Length -eq 0 )
 			{
-				Write-LogInfo -LogPath $script:sLogFile -Message "Group Type Override" -toscreen
-				Write-LogInfo -LogPath $script:sLogFile -Message $groupTypeOverride -toscreen
+				Write-LogInfo -LogPath $script:sLogFile -Message "Group Type Override NULL" -toscreen
 			}
 			else 
 			{
-				Write-LogInfo -LogPath $script:sLogFile -Message "Group Type Override NULL" -toscreen
+				Write-LogInfo -LogPath $script:sLogFile -Message "Group Type Override" -toscreen
+				Write-LogInfo -LogPath $script:sLogFile -Message $groupTypeOverride -toscreen
 			}
 			Write-LogInfo -LogPath $script:sLogFile -Message "Covert To Contact" -toscreen
 			Write-LogInfo -LogPath $script:sLogFile -Message $convertToContact -toscreen
