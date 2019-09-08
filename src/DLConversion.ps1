@@ -137,6 +137,12 @@ Version:		1.7
 Author:			Timothy J. McMichael
 Purpose/Change:	In this version we implement a swtich allowing for credentials to be supplied in an interactive fashion.  This prevents having to supply credentials within the XML file.
 
+Version:		1.8
+Author:			Timothy J. McMichael
+Purpose/Change: In version 1.8 we will attempt to track cloud only settings as they apply to the distribution group.  For example, it is possible that the on premsies distribution group was added
+with permissions, membership, restrictions, forwarding to cloud only objects or cloud only settings (like forwarding).  As with tracking on premises changes - the size of the tenant
+directly impacts the ability to do this work in a timely fashion.  A switch is utilized to override tracking these should the administrator not care.
+
   
 .EXAMPLE
 
