@@ -140,7 +140,7 @@ Purpose/Change:	In this version we implement a swtich allowing for credentials t
   
 .EXAMPLE
 
-DLConversion -dlToConvert dl@domain.com -ignoreInvalidDLMembers:$TRUE -ignoreInvalidManagedByMembers:$TRUE -groupTypeOverride "Security" -convertToContact:$TRUE
+DLConversion -dlToConvert dl@domain.com -ignoreInvalidDLMembers:$TRUE -ignoreInvalidManagedByMembers:$TRUE -groupTypeOverride "Security" -convertToContact:$TRUE -retainOnPremisesSettings:$TRUE -requireInteractiveCredentials:$TRUE
 #>
 
 #---------------------------------------------------------[Script Parameters]------------------------------------------------------
@@ -160,7 +160,7 @@ Param (
 	[Parameter(Mandatory=$FALSE,Position=5)]
 	[boolean]$convertToContact=$TRUE,
 	[Parameter(Mandatory=$TRUE,Position=6)]
-	[boolean]$retainOnPremisesSettings=$TRUE
+	[boolean]$retainOnPremisesSettings=$TRUE,
 	[Parameter(Mandatory=$TRUE,Position=7)]
 	[boolean]$requireInteractiveCredentials=$FALSE
 )
@@ -988,7 +988,7 @@ Function establishOnPremisesCredentials
 
 	Begin 
 	{
-	    Write-LogInfo -LogPath $script:sLogFile -Message 'This function imports the on premises secured credentials file....' -toscreen
+	    Write-LogInfo -LogPath $script:sLogFile -Message 'This function gathers the on premises secured credentials ....' -toscreen
 	}
 	Process 
 	{
@@ -1062,7 +1062,7 @@ Function establishOffice365Credentials
 
 	Begin 
 	{
-	    Write-LogInfo -LogPath $script:sLogFile -Message 'This function imports the Office 365 secured credentials file....' -toscreen
+	    Write-LogInfo -LogPath $script:sLogFile -Message 'This function gathers the Office 365 secured credentials....' -toscreen
 	}
 	Process 
 	{
@@ -1091,6 +1091,89 @@ Function establishOffice365Credentials
 		If ($?) 
 		{
 			Write-LogInfo -LogPath $script:sLogFile -Message 'The Office 365 credentials were successfully obtained.' -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message ' ' -toscreen
+		}
+		else
+		{
+
+			Write-LogError -LogPath $script:sLogFile -Message "The Office 365 credentials were not successfully obtained." -toscreen
+			Write-LogError -LogPath $script:sLogFile -Message $error[0] -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+		}
+	}
+}
+
+<#
+*******************************************************************************************************
+
+Function validateInteractiveCredentials
+
+.DESCRIPTION
+
+This function imports the on-premises credentials XML file.
+
+.PARAMETER credentialToTest
+
+NONE
+
+.INPUTS
+
+NONE
+
+.OUTPUTS 
+
+NONE
+
+*******************************************************************************************************
+#>
+
+Function validateInteractiveCredentials
+{
+	Param ($credentialToTest,$passwordType)
+
+	Begin 
+	{
+		Write-LogInfo -LogPath $script:sLogFile -Message 'This function validates if interactive credentials supplied contain user name and password....' -toscreen
+		Write-LogInfo -LogPath $script:sLogFile -Message 'Testing password type....' -toscreen
+		Write-LogInfo -LogPath $script:sLogFile -Message $passwordType -toscreen
+		
+		$functionCredentialPasswordLength = $credentialToTest.password.Length
+		$functionCredentialUserNameLength = $credentialToTest.username.Length
+		$functionErrorString = $NULL
+	}
+	Process 
+	{
+		Try 
+		{
+			If ( $functionCredentialUserNameLength -eq 0 )
+			{
+				$functionErrorString = $passwordType + " Username is blank - cannot proceed"
+				Write-Error $functionErrorString -ErrorAction SilentlyContinue
+			}
+			elseif ( $functionCredentialPasswordLength -eq 0 )
+			{
+				$functionErrorString = $passwordType + " Password is blank - cannot proceed"
+				Write-Error $functionErrorString -ErrorAction SilentlyContinue
+			}
+			else 
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Username and password combination are not NULL....' -toscreen
+			}
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+	}
+	End 
+	{
+		If ($?) 
+		{
+			Write-LogInfo -LogPath $script:sLogFile -Message 'The interactive credentials were successfully validated.' -toscreen
 			Write-LogInfo -LogPath $script:sLogFile -Message ' ' -toscreen
 		}
 		else
@@ -5195,6 +5278,15 @@ Start-Log -LogPath $script:sLogPath -LogName $script:sLogName -ScriptVersion $sc
 establishOnPremisesCredentials  #Function call to import and populate on premises credentials.
 
 establishOffice365Credentials  #Function call to import and populate Office 365 credentials.
+
+#If interactive credentials were requested - validate that nothing was passsed as null.
+
+If ( $requireInteractiveCredentials -eq $TRUE )
+{
+	validateInteractiveCredentials ( $script:onPremisesCredential ) ( "OnPremises" )
+
+	validateInteractiveCredentials ( $script:office365Credential  ) ( "Office365" )
+}
 
 createOnPremisesPowershellSession  #Creates the on premises powershell session to Exchange.
 
