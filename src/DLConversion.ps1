@@ -168,7 +168,9 @@ Param (
 	[Parameter(Mandatory=$TRUE,Position=6)]
 	[boolean]$retainOnPremisesSettings=$TRUE,
 	[Parameter(Mandatory=$TRUE,Position=7)]
-	[boolean]$requireInteractiveCredentials=$FALSE
+	[boolean]$requireInteractiveCredentials=$FALSE,
+	[Parameter(Mandatory=$TRUE,Position=8)]
+	[boolean]$retainO365CloudOnlySettings=$FALSE
 )
 
 #---------------------------------------------------------[Initialisations]--------------------------------------------------------
@@ -238,7 +240,7 @@ $script:x500Address=$NULL
 <###ADMIN###>$script:groupOrganizationalUnit = "OU=ConvertedDL,DC=DOMAIN,DC=LOCAL" #OU to move migrated DLs too.
 <###ADMIN###>$script:adDomainController = "dcname.domain.com" #List of domain controllers in domain.
 <###ADMIN###>[int32]$script:adDomainReplicationTime = 1 #Timeout to wait and allow for ad replication.
-<###ADMIN###>[int32]$script:dlDelectionTime = 1 #Timeout to wait before rechecking for deleted DL.
+<###ADMIN###>[int32]$script:dlDeletionTime = 1 #Timeout to wait before rechecking for deleted DL.
 <###ADMIN###>$script:adDomainController = "domaincontroller.company.local"
 
 #Establish script variables to backup distribution list information.
@@ -314,7 +316,11 @@ $script:onPremisesNewContactConfiguration = $NULL
 $script:arrayCounter=0	#Counter used to build arrays for the recipient arrays.
 $script:arrayGUID=$NULL	#Global used to store the recipient GUIDs to normalize objects.
 
-$script:newDynamicDLAddress	#Primary SMTP address built for the dynamic distribution list.
+$script:newDynamicDLAddress = $NULL	#Primary SMTP address built for the dynamic distribution list.
+
+[array]$script:O365CloudOnlyDistributionGroups = $NULL	#Array holds all distribution groups that are cloud only distribution groups.
+[array]$script:originalO365GrantSendOnBehalfTo = $NULL	#Array of all groups that are cloud only that contain the migrated DL as grant send on behalf to.
+
 
 #-----------------------------------------------------------[Functions]------------------------------------------------------------
 
@@ -5272,6 +5278,78 @@ Function resetOriginalDistributionListSettings
 	}
 }
 
+<#
+*******************************************************************************************************
+
+Function recordOriginalO365MultivaluedAttributes
+
+.DESCRIPTION
+
+Records information regarding the multi-valued attributes of Office 365 cloud only distribution lists for preservation.
+
+.PARAMETER 
+
+NONE
+
+.INPUTS
+
+NONE
+
+.OUTPUTS 
+
+NONE
+
+*******************************************************************************************************
+#>
+
+Function recordOriginalO365MultivaluedAttributes
+{
+	Param ()
+
+	Begin 
+	{
+		Write-LogInfo -LogPath $script:sLogFile -Message '******************************************************************' -toscreen
+		Write-LogInfo -LogPath $script:sLogFile -Message 'Entering function recordOriginalO365MultivaluedAttributes...' -toscreen
+		Write-LogInfo -LogPath $script:sLogFile -Message 'Records information regarding the multi-valued attributes of Office 365 cloud only distribution lists for preservation.' -toscreen
+		Write-LogInfo -LogPath $script:sLogFile -Message '******************************************************************' -toscreen
+
+		#Record the identity of the moved distribution list (updated post move so we have correct identity)
+		
+		$functionGroupIdentity = $script:newOffice365DLConfiguration.identity.tostring()	#Function variable to hold the identity of the group.
+		$functionCommand = $NULL	#Holds the expression that we will be executing to determine multi-valued membership.
+		[array]$functionGroupArray = @()
+		$functionRecipientObject = $NULL
+		
+		Write-LogInfo -LogPath $script:sLogFile -Message 'The following group identity is the filtered name.' -toscreen
+		Write-LogInfo -LogPath $script:sLogFile -Message $functionGroupIdentity -toscreen
+	}
+	Process 
+	{
+		Try 
+		{
+			#Using a filter detemrine all groups this group had grant send on behalf to.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all grantSendOnBehalfTo for the identity...' -toscreen
+
+            $functionCommand = "get-distributionGroup -resultsize unlimited -Filter { ( GrantSendOnBehalfTo -eq '$functionGroupIdentity' ) -and ( IsDirSynced -eq $FALSE ) } "
+            
+            $script:originalO365GrantSendOnBehalfTo = Invoke-Expression $functionCommand
+		
+			foreach ( $member in $script:originalGrantSendOnBehalfTo )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message $member.primarySMTPAddress -ToScreen
+			}
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+	}
+}
+
 
 #-----------------------------------------------------------[Execution]------------------------------------------------------------
 
@@ -5595,7 +5673,7 @@ do
 	if ( $script:dlDeletionRetryRequired -eq $TRUE)
 	{
 		Write-LogInfo -LogPath $script:sLogFile -Message "Wating for original DL deletion from Office 365" -ToScreen
-		Start-PSCountdown -Minutes $script:dlDelectionTime -Title "Waiting for DL deletion to process in Office 365" -Message "Waiting for DL deletion to process in Office 365"
+		Start-PSCountdown -Minutes $script:dlDeletionTime -Title "Waiting for DL deletion to process in Office 365" -Message "Waiting for DL deletion to process in Office 365"
 		$error.clear()
 	}
 	$script:dlDeletionRetryRequired = $TRUE
