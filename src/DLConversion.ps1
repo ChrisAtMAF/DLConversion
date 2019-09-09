@@ -156,20 +156,20 @@ Param (
 
 	[Parameter(Mandatory=$True,Position=1)]
     [string]$dlToConvert,
-    [Parameter(Mandatory=$True,Position=2)]
+    [Parameter(Position=2)]
     [boolean]$ignoreInvalidDLMember=$FALSE,
-    [Parameter(Mandatory=$True,Position=3)]
+    [Parameter(Position=3)]
 	[boolean]$ignoreInvalidManagedByMember=$FALSE,
-	[Parameter(Mandatory=$FALSE,Position=4)]
+	[Parameter(Position=4)]
 	[ValidateSet("Security","Distribution",$NULL)]
 	[string]$groupTypeOverride=$NULL,
-	[Parameter(Mandatory=$FALSE,Position=5)]
+	[Parameter(Position=5)]
 	[boolean]$convertToContact=$TRUE,
-	[Parameter(Mandatory=$TRUE,Position=6)]
+	[Parameter(Position=6)]
 	[boolean]$retainOnPremisesSettings=$True,
-	[Parameter(Mandatory=$TRUE,Position=7)]
+	[Parameter(Position=7)]
 	[boolean]$retainO365CloudOnlySettings=$FALSE,
-	[Parameter(Mandatory=$TRUE,Position=8)]
+	[Parameter(Position=8)]
 	[boolean]$requireInteractiveCredentials=$FALSE
 )
 
@@ -241,7 +241,6 @@ $script:x500Address=$NULL
 <###ADMIN###>$script:adDomainController = "dcname.domain.com" #List of domain controllers in domain.
 <###ADMIN###>[int32]$script:adDomainReplicationTime = 1 #Timeout to wait and allow for ad replication.
 <###ADMIN###>[int32]$script:dlDeletionTime = 1 #Timeout to wait before rechecking for deleted DL.
-<###ADMIN###>$script:adDomainController = "domaincontroller.company.local"
 
 #Establish script variables to backup distribution list information.
 
@@ -5404,14 +5403,53 @@ Function recordOriginalO365MultivaluedAttributes
 		
 		$functionGroupIdentity = $script:newOffice365DLConfiguration.identity.tostring()	#Function variable to hold the identity of the group.
 		$functionCommand = $NULL	#Holds the expression that we will be executing to determine multi-valued membership.
-		[array]$functionGroupArray = @()
 		$functionRecipientObject = $NULL
+		[array]$functionAllCloudOnlyGroups = $NULL
+		[array]$functionAllOffice365Groups = $NULL
 		
 		Write-LogInfo -LogPath $script:sLogFile -Message 'The following group identity is the filtered name.' -toscreen
 		Write-LogInfo -LogPath $script:sLogFile -Message $functionGroupIdentity -toscreen
 	}
 	Process 
 	{
+		Try 
+		{
+			#Filters in office 365 are not necessarily reliable based on testing.
+			#What we will do here is gather all cloud only group objects into a variable for the purposes of working through it.
+			#This should limit the query to the service against this call - and from there we will filter out all the things we want.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gaterhing all cloud only distribution lists...' -toscreen
+
+			$functionCommand = "get-distributionGroup -resultSize unlimited | where { `$_.isDirSynced -eq `$FALSE } " 
+			            
+            $functionAllCloudOnlyGroups = Invoke-Expression $functionCommand
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			#Filters in office 365 are not necessarily reliable based on testing.
+			#What we will do here is gather all cloud only group objects into a variable for the purposes of working through it.
+			#This should limit the query to the service against this call - and from there we will filter out all the things we want.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gaterhing all Office 365 Groups...' -toscreen
+
+			$functionCommand = "get-unifiedGroup -resultsize unlimited " 
+			            
+            $functionAllOffice365Groups = Invoke-Expression $functionCommand
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
 		Try 
 		{
 			#Using a filter detemrine all groups this group had grant send on behalf to.
@@ -5422,7 +5460,7 @@ Function recordOriginalO365MultivaluedAttributes
             
             $script:originalO365GrantSendOnBehalfTo = Invoke-Expression $functionCommand
 		
-			foreach ( $member in $script:originalGrantSendOnBehalfTo )
+			foreach ( $member in $script:originalO365GrantSendOnBehalfTo )
 			{
 				Write-LogInfo -LogPath $script:sLogFile -Message $member.primarySMTPAddress -ToScreen
 			}
@@ -5727,7 +5765,7 @@ replicateDomainControllers
 
 #Start countdown for the period of time specified by the variable for post domain controller replication.
 
-Start-PSCountdown -Minutes 1 -Title "Waiting for domain controller replication" -Message "Waiting for domain controller replication"
+Start-PSCountdown -Minutes $script:adDomainReplicationTime -Title "Waiting for domain controller replication" -Message "Waiting for domain controller replication"
 
 Write-LogInfo -LogPath $script:sLogFile -Message "Invoking AADConnect Delta Sync Remotely" -ToScreen
 
@@ -5755,13 +5793,13 @@ $error.clear()
 #If the DL is found the retry variable will tirgger us to loop back around and try again.
 #When the error condition is encountered the DL is no longer there - good - we can move on.
 
-Write-LogInfo -LogPath $script:sLogFile -Message "Wating for original DL deletion from Office 365" -ToScreen
+Write-LogInfo -LogPath $script:sLogFile -Message "Waiting for original DL deletion from Office 365" -ToScreen
 
 do
 {
 	if ( $script:dlDeletionRetryRequired -eq $TRUE)
 	{
-		Write-LogInfo -LogPath $script:sLogFile -Message "Wating for original DL deletion from Office 365" -ToScreen
+		Write-LogInfo -LogPath $script:sLogFile -Message "Waiting for original DL deletion from Office 365" -ToScreen
 		Start-PSCountdown -Minutes $script:dlDeletionTime -Title "Waiting for DL deletion to process in Office 365" -Message "Waiting for DL deletion to process in Office 365"
 		$error.clear()
 	}
@@ -5948,7 +5986,7 @@ if ($convertToContact -eq $TRUE)
 
 	#Start countdown for the period of time specified by the variable for post domain controller replication.
 
-	Start-PSCountdown -Minutes 1 -Title "Waiting for domain controller replication" -Message "Waiting for domain controller replication"
+	Start-PSCountdown -Minutes $script:adDomainReplicationTime -Title "Waiting for domain controller replication" -Message "Waiting for domain controller replication"
 
 	do
 	{
