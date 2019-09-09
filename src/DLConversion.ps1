@@ -168,7 +168,7 @@ Param (
 	[Parameter(Position=6)]
 	[boolean]$retainOnPremisesSettings=$True,
 	[Parameter(Position=7)]
-	[boolean]$retainO365CloudOnlySettings=$FALSE,
+	[boolean]$retainO365CloudOnlySettings=$True,
 	[Parameter(Position=8)]
 	[boolean]$requireInteractiveCredentials=$FALSE
 )
@@ -5418,11 +5418,9 @@ Function recordOriginalO365MultivaluedAttributes
 			#What we will do here is gather all cloud only group objects into a variable for the purposes of working through it.
 			#This should limit the query to the service against this call - and from there we will filter out all the things we want.
 
-			Write-LogInfo -LogPath $script:sLogFile -Message 'Gaterhing all cloud only distribution lists...' -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gathering all cloud only distribution lists...' -toscreen
 
-			$functionCommand = "get-o365distributionGroup -resultSize unlimited | where { `$_.isDirSynced -eq `$FALSE } " 
-			            
-            $functionAllCloudOnlyGroups = Invoke-Expression $functionCommand
+			$functionAllCloudOnlyGroups = get-o365DistributionGroup -resultsize unlimited | where { $_.isDirSynced -EQ $FALSE }
 		}
 		Catch 
 		{
@@ -5437,11 +5435,9 @@ Function recordOriginalO365MultivaluedAttributes
 			#What we will do here is gather all cloud only group objects into a variable for the purposes of working through it.
 			#This should limit the query to the service against this call - and from there we will filter out all the things we want.
 
-			Write-LogInfo -LogPath $script:sLogFile -Message 'Gaterhing all Office 365 Groups...' -toscreen
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gathering all Office 365 Groups...' -toscreen
 
-			$functionCommand = "get-o365unifiedGroup -resultsize unlimited " 
-			            
-            $functionAllOffice365Groups = Invoke-Expression $functionCommand
+			$functionAllOffice365Groups = get-O365UnifiedGroup -resultsize unlimited
 		}
 		Catch 
 		{
@@ -5933,6 +5929,9 @@ if ($convertToContact -eq $TRUE)
 	#To determine if a group is set on the properties of another groups attributes - we need the group id.  The ID needs to be updated since the groups OU was moved.
 
 	recordMovedOriginalDistributionGroupProperties
+
+	#The administrator has decided the way to preserve as many on premises properties as available.
+	#This may add significant time to script execution.
 	
 	if ( $retainOnPremisesSettings -eq $TRUE )
 	{
@@ -5953,6 +5952,16 @@ if ($convertToContact -eq $TRUE)
 		#Write the multi valued attributes to XML in case of conversion failure.
 
 		backupOnPremisesMultiValuedAttributes
+	}
+
+	#The administrator has decided they want to preserve as many Office 365 cloud only properies as possible.
+	#This may incur significant script execution time.
+
+	if ( $retainO365CloudOnlySettings -eq $TRUE )
+	{
+		#Record all classes of multivalue attributes for cloud only distribution lists and office 365 groups.
+
+		recordOriginalO365MultivaluedAttributes
 	}
 	
 	#Remove the on prmeises distribution list that was converted.
