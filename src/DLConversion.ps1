@@ -5420,7 +5420,7 @@ Function recordOriginalO365MultivaluedAttributes
 
 			Write-LogInfo -LogPath $script:sLogFile -Message 'Gaterhing all cloud only distribution lists...' -toscreen
 
-			$functionCommand = "get-distributionGroup -resultSize unlimited | where { `$_.isDirSynced -eq `$FALSE } " 
+			$functionCommand = "get-o365distributionGroup -resultSize unlimited | where { `$_.isDirSynced -eq `$FALSE } " 
 			            
             $functionAllCloudOnlyGroups = Invoke-Expression $functionCommand
 		}
@@ -5439,7 +5439,7 @@ Function recordOriginalO365MultivaluedAttributes
 
 			Write-LogInfo -LogPath $script:sLogFile -Message 'Gaterhing all Office 365 Groups...' -toscreen
 
-			$functionCommand = "get-unifiedGroup -resultsize unlimited " 
+			$functionCommand = "get-o365unifiedGroup -resultsize unlimited " 
 			            
             $functionAllOffice365Groups = Invoke-Expression $functionCommand
 		}
@@ -5452,13 +5452,17 @@ Function recordOriginalO365MultivaluedAttributes
 		}
 		Try 
 		{
-			#Using a filter detemrine all groups this group had grant send on behalf to.
+			#Iterate through all groups locating those that have grant send on behalf to set to the identity.
 
 			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all grantSendOnBehalfTo for the identity...' -toscreen
 
-            $functionCommand = "get-distributionGroup -resultsize unlimited -Filter { ( GrantSendOnBehalfTo -eq '$functionGroupIdentity' ) -and ( IsDirSynced -eq $FALSE ) } "
-            
-            $script:originalO365GrantSendOnBehalfTo = Invoke-Expression $functionCommand
+			foreach ( $functionGroup in $functionAllCloudOnlyGroups )
+			{
+				if ( $functionGroup.grantSendOnBehalfTo -eq $functionGroupIdentity )
+				{
+					$script:originalO365GrantSendOnBehalfTo+=$functionGroup
+				}
+			}	
 		
 			foreach ( $member in $script:originalO365GrantSendOnBehalfTo )
 			{
