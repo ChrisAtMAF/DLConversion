@@ -319,6 +319,29 @@ $script:newDynamicDLAddress = $NULL	#Primary SMTP address built for the dynamic 
 
 [array]$script:O365CloudOnlyDistributionGroups = $NULL	#Array holds all distribution groups that are cloud only distribution groups.
 [array]$script:originalO365GrantSendOnBehalfTo = $NULL	#Array of all groups that are cloud only that contain the migrated DL as grant send on behalf to.
+[array]$script:originalO365AcceptMessagesOnlyFromDLMembers = $NULL #Array of all groups that are cloud only that contain the mgirated DL as accept messages only from.
+[array]$script:originalO365ManagedBy = $NULL #Array of all groups that are cloud only that contain the migrated DL as managed By.
+[array]$script:originalO365RejectMessagesFromDLMembers = $NULL #Array of all groups that are cloud only that contain the migrated DL as reject messages from DL members.
+[array]$script:originalO365BypassModerationFromSendersOrMembers = $NULL #Array of all groups that are cloud only that contain the migrated DL as bypass moderation.
+[array]$script:originalO365ForwardingAddress = $NULL #Array of all objects where the migrated group is set for explicity forwarding address.
+[array]$script:originalO365MemberOf = $NULL #Array of all cloud only distribution groups where the migrated group is a member of the distribution group.
+
+<###ADMIN###>$script:originalO365GrantSendOnBehalfToXMLName="o365GrantSendOnBehalfTo.xml"
+<###ADMIN###>$script:originalO365AcceptMessagesFromXMLName="o365AcceptMessagesFrom.xml"
+<###ADMIN###>$script:originalO365ManagedByXMLName="o365ManagedBy.xml"
+<###ADMIN###>$script:originalO365RejectMessagesFromXMLName="o365RejectMessagesFrom.xml"
+<###ADMIN###>$script:originalO365BypassModerationFromSendersOrMembersXMLName="o365Bypass.xml"
+<###ADMIN###>$script:originalForwardingAddressXMLName="o365ForwardAddress.xml"
+<###ADMIN###>$script:originalO365MemberOfXMLName="o365MemberOf.xml"
+
+
+$script:originalO365GrantSendOnBehalfToXML=Join-Path $script:backupXMLPath -ChildPath $script:originalo365GrantSendOnBehalfToXMLName
+$script:originalO365AcceptMessagesFromXML=Join-Path $script:backupXMLPath -ChildPath $script:originalo365AcceptMessagesFromXMLName
+$script:originalO365ManagedByXML=Join-Path $script:backupXMLPath -ChildPath $script:originalo365ManagedByXMLName
+$script:originalO365RejectMessagesFromXML=Join-Path $script:backupXMLPath -ChildPath $script:originalo365RejectMessagesFromXMLName
+$script:originalO365BypassModerationFromSendersOrMembersXML=Join-Path $script:backupXMLPath -ChildPath $script:originalo365BypassModerationFromSendersOrMembersXMLName
+$script:originalO365ForwardingAddressXML=Join-Path $script:backupXMLPath -ChildPath $script:originalForwardingAddressXMLName
+$script:originalO365MemberOfXML=Join-Path $script:backupXMLPath -ChildPath $script:originalO365MemberOfXMLName
 
 
 #-----------------------------------------------------------[Functions]------------------------------------------------------------
@@ -2391,6 +2414,164 @@ Function backupOnPremisesMultiValuedAttributes
 <#
 *******************************************************************************************************
 
+Function backupO365RetainedSettings
+
+.DESCRIPTION
+
+This function records all the values of the cloud only distribution groups that have dependencies on the group migrating.
+
+.PARAMETER <Parameter_Name>
+
+NONE
+
+.INPUTS
+
+NONE
+
+.OUTPUTS 
+
+NONE
+
+*******************************************************************************************************
+#>
+
+Function backupO365RetainedSettings
+{
+	Param ()
+
+	Begin 
+	{
+	    Write-LogInfo -LogPath $script:sLogFile -Message 'This function exports all Office 365 non-dir sync objects that have dependencies on the migrated group...' -toscreen
+	}
+	Process 
+	{
+		Try 
+		{
+			if ( $script:originalO365GrantSendOnBehalfTo -ne $NULL )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Writing Office 365 grant send on behalf to to XML...' -toscreen
+				$script:originalO365GrantSendOnBehalfTo| Export-CLIXML -Path $script:originalO365GrantSendOnBehalfToXML
+			}
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			if ($script:originalO365AcceptMessagesOnlyFromDLMembers -ne $NULL )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Writing Office 365 accept messages from  to to XML...' -toscreen
+				$script:originalO365AcceptMessagesOnlyFromDLMembers | Export-CLIXML -Path $script:originalO365AcceptMessagesFromXML
+			}
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			if ( $script:originalO365ManagedBy -ne $NULL )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Writing Office 365 managed by to to XML...' -toscreen
+				$script:originalO365ManagedBy | Export-CLIXML -Path $script:originalO365ManagedByXML
+			}
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			if ( $script:originalO365RejectMessagesFromDLMembers -ne $NULL )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Writing Office 365 reject messages from to XML...' -toscreen
+				$script:originalO365RejectMessagesFromDLMembers | Export-CLIXML -Path $script:originalO365RejectMessagesFromXML
+			}
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			if ( $script:originalO365BypassModerationFromSendersOrMembers -ne $NULL )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Writing Office 365 bypass moderation to XML...' -toscreen
+				$script:originalO365BypassModerationFromSendersOrMembers | Export-CLIXML -Path $script:originalO365BypassModerationFromSendersOrMembersXML
+			}
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			if ( $script:originalO365ForwardingAddress -ne $NULL )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Writing Office 365 forwarding address to XML...' -toscreen
+				$script:originalO365ForwardingAddress | Export-CLIXML -Path $script:originalO365ForwardingAddressXML
+			}
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			if ( $script:originalO365MemberOf -ne $NULL )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Writing o365 Member of to a xml file...' -toscreen
+				$script:originalO365MemberOf | Export-CLIXML -Path $script:originalO365MemberOfXML
+			}
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+	}
+	End 
+	{
+		If ($?) 
+		{
+			Write-LogInfo -LogPath $script:sLogFile -Message 'The O365 multivalued attributes for the migrated group has been recorded to XML.' -toscreen
+            Write-LogInfo -LogPath $script:sLogFile -Message ' ' -toscreen
+		}
+		else
+		{
+
+			Write-LogError -LogPath $script:sLogFile -Message "The O365 multivalued attributes for the migrated group could not be recorded to XML." -toscreen
+			Write-LogError -LogPath $script:sLogFile -Message $error[0] -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+		}
+	}
+}
+
+<#
+*******************************************************************************************************
+
 Function backupOnPremisesDLArrays
 
 .DESCRIPTION
@@ -4254,6 +4435,39 @@ Function recordOriginalMultivaluedAttributes
 			Stop-Log -LogPath $script:sLogFile -ToScreen
 			Break
 		}
+		Try 
+		{
+			#Perform a server side search of all groups where this group was set to bypass moderation.
+			#Note:  There is no filerable attribute for this - this operation can be very expensive, memory intensive, and time consuming.
+			#Note:  Administrators may consider commenting out these portions and not attempting to perserve this for other DL migrations.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all bypass moderations for the identity...' -toscreen
+
+			$functionGroupArray = invoke-command -scriptBlock { get-distributiongroup -resultsize unlimited -domainController $script:adDomainController | where { $_.bypassModerationFromSendersOrMembers -eq $functionGroupIdentity } }
+
+			foreach ( $loopGroup in $functionGroupArray)
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message $loopGroup.primarySMTPAddress -ToScreen
+
+				#Create a custom object of each of the DLs found for later use.
+
+				$functionRecipientObject = New-Object PSObject -Property @{
+					DistinguishedName = $loopgroup.distinguishedName
+					Alias = $loopGroup.Alias
+					Name = $loopGroup.Name
+					PrimarySMTPAddressOrUPN = $loopGroup.primarySMTPAddress
+				}
+
+				$script:originalBypassModerationFromSendersOrMembers+=$functionRecipientObject		
+			}
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
 	}
 }
 
@@ -5401,7 +5615,8 @@ Function recordOriginalO365MultivaluedAttributes
 
 		#Record the identity of the moved distribution list (updated post move so we have correct identity)
 		
-		$functionGroupIdentity = $script:newOffice365DLConfiguration.identity.tostring()	#Function variable to hold the identity of the group.
+		$functionGroupIdentity = $script:office365DLConfiguration.identity.tostring()	#Function variable to hold the identity of the group.
+		$functionGroupForwardingIdentity = $script:office365DLConfiguration.organizationalUnit.tostring()+"/"+$script:office365DLConfiguration.identity.tostring()
 		$functionCommand = $NULL	#Holds the expression that we will be executing to determine multi-valued membership.
 		$functionRecipientObject = $NULL
 		[array]$functionAllCloudOnlyGroups = $NULL
@@ -5414,13 +5629,13 @@ Function recordOriginalO365MultivaluedAttributes
 	{
 		Try 
 		{
-			#Filters in office 365 are not necessarily reliable based on testing.
-			#What we will do here is gather all cloud only group objects into a variable for the purposes of working through it.
-			#This should limit the query to the service against this call - and from there we will filter out all the things we want.
-
+			#Getting all distribution groups where they are cloud only.
+			
 			Write-LogInfo -LogPath $script:sLogFile -Message 'Gathering all cloud only distribution lists...' -toscreen
 
-			$functionAllCloudOnlyGroups = get-o365DistributionGroup -resultsize unlimited | where { $_.isDirSynced -EQ $FALSE }
+			$functionCommand = "get-o365DistributionGroup -resultsize unlimited -filter { IsDirSynced -eq `$FALSE}"
+
+			$functionAllCloudOnlyGroups = Invoke-Expression $functionCommand
 		}
 		Catch 
 		{
@@ -5456,11 +5671,139 @@ Function recordOriginalO365MultivaluedAttributes
 			{
 				if ( $functionGroup.grantSendOnBehalfTo -eq $functionGroupIdentity )
 				{
+					Write-LogInfo -LogPath $script:sLogFile -Message $functionGroup.primarySMTPAddress -ToScreen
 					$script:originalO365GrantSendOnBehalfTo+=$functionGroup
 				}
 			}	
-		
-			foreach ( $member in $script:originalO365GrantSendOnBehalfTo )
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			#Iterate through all groups locating those that have grant send on behalf to set to the identity.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all acceptMessageOnlyFromDLMembers for the identity...' -toscreen
+
+			foreach ( $functionGroup in $functionAllCloudOnlyGroups )
+			{
+				if ( $functionGroup.AcceptMessagesOnlyFromDLMembers -eq $functionGroupIdentity )
+				{
+					Write-LogInfo -LogPath $script:sLogFile -Message $functionGroup.primarySMTPAddress -ToScreen
+					$script:originalO365AcceptMessagesOnlyFromDLMembers+=$functionGroup
+				}
+			}	
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			#Iterate through all groups locating those that have grant send on behalf to set to the identity.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all managedBy for the identity...' -toscreen
+
+			foreach ( $functionGroup in $functionAllCloudOnlyGroups )
+			{
+				if ( $functionGroup.ManagedBy -eq $functionGroupIdentity )
+				{
+					Write-LogInfo -LogPath $script:sLogFile -Message $functionGroup.primarySMTPAddress -ToScreen
+					$script:originalO365ManagedBy+=$functionGroup
+				}
+			}	
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			#Iterate through all groups locating those that have grant send on behalf to set to the identity.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all rejectMessagesFromDLMembers for the identity...' -toscreen
+
+			foreach ( $functionGroup in $functionAllCloudOnlyGroups )
+			{
+				if ( $functionGroup.RejectMessagesFromDLMembers -eq $functionGroupIdentity )
+				{
+					Write-LogInfo -LogPath $script:sLogFile -Message $functionGroup.primarySMTPAddress -ToScreen
+					$script:originalO365RejectMessagesFromDLMembers+=$functionGroup
+				}
+			}	
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			#Iterate through all groups locating those that have grant send on behalf to set to the identity.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all bypassModerationFromSendersOrMembers for the identity...' -toscreen
+
+			foreach ( $functionGroup in $functionAllCloudOnlyGroups )
+			{
+				if ( $functionGroup.bypassModerationFromSendersOrMembers -eq $functionGroupIdentity )
+				{
+					Write-LogInfo -LogPath $script:sLogFile -Message $functionGroup.primarySMTPAddress -ToScreen
+					$script:originalO365BypassModerationFromSendersOrMembers+=$functionGroup
+				}
+			}	
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			#Interate through all mailboxes and determine any that have a forwarding address of the DL to be migrated.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all cloud mailboxes enabled for forwarding to the migrated DL for the identity...' -toscreen
+			
+			$functionCommand = "get-o365Mailbox -resultsize unlimited -Filter { ForwardingAddress -eq '$functionGroupForwardingIdentity' }"
+
+			$script:originalO365ForwardingAddress = invoke-expression $functionCommand
+
+			foreach ( $member in $script:originalO365ForwardingAddress )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message $member.primarySMTPAddress -ToScreen
+			}
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			#Iterate through all groups and see if we can find any cloud only groups that this user is a member of.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all cloud only distribution groups that this user is a member of...' -toscreen
+			
+			$functionCommand = "get-o365Recipient -resultsize unlimited -Filter { Members -eq '$functionGroupForwardingIdentity' }"
+
+			$script:originalO365MemberOf = invoke-expression $functionCommand
+
+			foreach ( $member in $script:originalO365MemberOf )
 			{
 				Write-LogInfo -LogPath $script:sLogFile -Message $member.primarySMTPAddress -ToScreen
 			}
@@ -5757,6 +6100,21 @@ if ( $script:onpremisesdlConfiguration.BypassModerationFromSendersOrMembers -ne 
 
 backupOnPremisesDLArrays
 
+#If the administrator has choosen to preserve the Office 365 group settings - we need to determine everything now. 
+#This requires the convert to contact option to be selected.
+
+if ( $convertToContact -eq $TRUE )
+{
+	if ( $retainO365CloudOnlySettings -eq $TRUE )
+	{
+		#We need to gather all the settings that are on the existing dir synced distribution group that may be set on cloud only distribution groups.
+
+		recordOriginalO365MultivaluedAttributes
+
+		backupO365RetainedSettings
+	}	
+}
+
 moveGroupToOU  #Move the group to a non-sync OU to preserve it.
 
 #Replicate each domain controller in the domain.
@@ -5952,16 +6310,6 @@ if ($convertToContact -eq $TRUE)
 		#Write the multi valued attributes to XML in case of conversion failure.
 
 		backupOnPremisesMultiValuedAttributes
-	}
-
-	#The administrator has decided they want to preserve as many Office 365 cloud only properies as possible.
-	#This may incur significant script execution time.
-
-	if ( $retainO365CloudOnlySettings -eq $TRUE )
-	{
-		#Record all classes of multivalue attributes for cloud only distribution lists and office 365 groups.
-
-		recordOriginalO365MultivaluedAttributes
 	}
 	
 	#Remove the on prmeises distribution list that was converted.
