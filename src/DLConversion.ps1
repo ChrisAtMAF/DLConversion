@@ -355,6 +355,8 @@ $script:originalO365GroupGrantSendOnBehalfToXML=Join-Path $script:backupXMLPath 
 $script:originalO365GroupAcceptMessagesFromXML=Join-Path $script:backupXMLPath -ChildPath $script:originalo365GroupAcceptMessagesFromXMLName
 $script:originalO365GroupRejectMessagesFromXML=Join-Path $script:backupXMLPath -ChildPath $script:originalo365GroupRejectMessagesFromXMLName
 
+<###ADMIN###>[int]$script:refreshPowerShellSessionCounter=1000
+
 
 #-----------------------------------------------------------[Functions]------------------------------------------------------------
 
@@ -6125,7 +6127,7 @@ Function resetCloudDistributionListSettings
 
 			#The group had accept only from set on other groups - add the group back.
 
-			$functionArray =  $$script:originalO365GroupAcceptMessagesOnlyFromDLMembers
+			$functionArray =  $script:originalO365GroupAcceptMessagesOnlyFromDLMembers
 
             foreach ( $member in $functionArray )
             {
@@ -6188,7 +6190,7 @@ Function resetCloudDistributionListSettings
 					{
 						Write-LogInfo -LogPath $script:sLogFile -Message 'Gatheing groups current reject from settings... ' -ToScreen
 
-						$functionGroup=(get-o365Universalgroup -identity $member.PrimarySMTPAddress).RejectMessagesFromSendersOrMembers
+						$functionGroup=(get-o365UnifiedGroup -identity $member.PrimarySMTPAddress).RejectMessagesFromSendersOrMembers
 					}
 					Catch
 					{
@@ -6206,7 +6208,7 @@ Function resetCloudDistributionListSettings
 						Write-LogInfo -LogPath $script:sLogFile $member.primarySMTPAddress -ToScreen
 						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
 					
-						set-o365Universalgroup -identity $member.PrimarySMTPAddress -RejectMessagesFromSendersOrMembers $functionGroup
+						set-o365Unifiedgroup -identity $member.PrimarySMTPAddress -RejectMessagesFromSendersOrMembers $functionGroup
 					}
 					Catch
 					{
@@ -6238,7 +6240,7 @@ Function resetCloudDistributionListSettings
 					{
 						Write-LogInfo -LogPath $script:sLogFile -Message 'Gathering groups current grant sent on behalf settings... ' -ToScreen
 					
-						$functionGroup=(get-o365Universalgroup -identity $member.PrimarySMTPAddress).GrantSendOnBehalfTo
+						$functionGroup=(get-o365UnifiedGroup -identity $member.PrimarySMTPAddress).GrantSendOnBehalfTo
 					}
 					Catch
 					{
@@ -6256,7 +6258,7 @@ Function resetCloudDistributionListSettings
 						Write-LogInfo -LogPath $script:sLogFile $member.primarySMTPAddress -ToScreen
 
 						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
-						set-o365Universalgroup -identity $member.PrimarySMTPAddress -GrantSendOnBehalfTo $functionGroup
+						set-o365Unifiedgroup -identity $member.PrimarySMTPAddress -GrantSendOnBehalfTo $functionGroup
 					}
 					Catch
 					{
@@ -6660,7 +6662,7 @@ if ( $script:onpremisesdlconfigurationMembership -ne $NULL )
 {
     buildMembershipArray ( "DLMembership" ) ( "onpremisesdlconfigurationMembershipArray") ($ignoreInvalidDLMember) #This function builds an array of members for the DL <or> multivalued attributes.
     
-	if ( $script:onpremisesdlconfigurationMembership.count -gt 1000 )
+	if ( $script:onpremisesdlconfigurationMembership.count -gt $script:refreshPowerShellSessionCounter )
 	{
 		refreshOffice365PowerShellSession #Refreshing the session here since building the membership array can take a while depending on array size.
 	}
@@ -6703,7 +6705,7 @@ if ( $script:onpremisesdlConfiguration.ManagedBy -ne $NULL )
 {
     buildMembershipArray ( "ManagedBy" ) ( "onpremisesdlconfigurationManagedByArray" ) ( $ignoreInvalidManagedByMember )
     
-    if ( $script:onpremisesdlConfiguration.ManagedBy.count -gt 1000 )
+    if ( $script:onpremisesdlConfiguration.ManagedBy.count -gt $script:refreshPowerShellSessionCounter )
 	{
 		refreshOffice365PowerShellSession #Refreshing the session here since building the membership array can take a while depending on array size.
 	}
@@ -6731,7 +6733,7 @@ if ( $script:onpremisesdlConfiguration.ModeratedBy -ne $NULL )
 {
     buildmembershipArray ( "ModeratedBy" ) ( "onpremisesdlconfigurationModeratedByArray" ) 
     
-    if ( $script:onpremisesdlConfiguration.ModeratedBy.count -gt 1000 )
+    if ( $script:onpremisesdlConfiguration.ModeratedBy.count -gt $script:refreshPowerShellSessionCounter )
 	{
 		refreshOffice365PowerShellSession #Refreshing the session here since building the membership array can take a while depending on array size.O
 	}
@@ -6759,7 +6761,7 @@ if ( $script:onpremisesdlConfiguration.GrantSendOnBehalfTo -ne $NULL )
 {
     buildmembershipArray ( "GrantSendOnBehalfTo" ) ( "onpremisesdlconfigurationGrantSendOnBehalfTOArray" )
     
-    if ( $script:onpremisesdlConfiguration.GrantSendOnBehalfTo.count -gt 1000 )
+    if ( $script:onpremisesdlConfiguration.GrantSendOnBehalfTo.count -gt $script:refreshPowerShellSessionCounter )
 	{
 		refreshOffice365PowerShellSession #Refreshing the session here since building the membership array can take a while depending on array size.
 	}
@@ -6790,7 +6792,7 @@ if ( $script:onpremisesdlConfiguration.AcceptMessagesOnlyFromSendersOrMembers -n
 {
     buildMembershipArray ( "AcceptMessagesOnlyFromSendersOrMembers" ) ( "onpremisesdlconfigurationAcceptMessagesOnlyFromSendersOrMembers" )
     
-    if ( $script:onpremisesdlConfiguration.AcceptMessagesOnlyFromSendersOrMembers.count -gt 1000 )
+    if ( $script:onpremisesdlConfiguration.AcceptMessagesOnlyFromSendersOrMembers.count -gt $script:refreshPowerShellSessionCounter )
 	{
 		refreshOffice365PowerShellSession #Refreshing the session here since building the membership array can take a while depending on array size.
 	}
@@ -6821,7 +6823,7 @@ if ( $script:onpremisesdlConfiguration.RejectMessagesFromSendersOrMembers -ne $N
 {
     buildMembershipArray ( "RejectMessagesFromSendersOrMembers" ) ( "onpremisesdlconfigurationRejectMessagesFromSendersOrMembers" )
     
-    if ( $script:onpremisesdlConfiguration.RejectMessagesFromSendersOrMembers.count -gt 1000 )
+    if ( $script:onpremisesdlConfiguration.RejectMessagesFromSendersOrMembers.count -gt $script:refreshPowerShellSessionCounter )
 	{
 		refreshOffice365PowerShellSession #Refreshing the session here since building the membership array can take a while depending on array size.
 	}
@@ -6852,7 +6854,7 @@ if ( $script:onpremisesdlConfiguration.BypassModerationFromSendersOrMembers -ne 
 {
     buildMembershipArray ( "BypassModerationFromSendersOrMembers") ( "onPremsiesDLBypassModerationFromSendersOrMembers" )
     
-    if ( $script:onpremisesdlConfiguration.BypassModerationFromSendersOrMembership.count -gt 1000 )
+    if ( $script:onpremisesdlConfiguration.BypassModerationFromSendersOrMembership.count -gt $script:refreshPowerShellSessionCounter )
 	{
 		refreshOffice365PowerShellSession #Refreshing the session here since building the membership array can take a while depending on array size.
 	}
@@ -6970,7 +6972,7 @@ if ( $script:onpremisesdlconfigurationMembershipArray -ne $NULL)
 		Write-Loginfo -LogPath $script:sLogFile -Message "Processing DL Membership member to Office 365..." -toscreen
 		Write-LogInfo -LogPath $script:sLogFile -Message $member.PrimarySMTPAddressOrUPN -toscreen
 		Write-LogInfo -LogPath $script:sLogFile -Message $member.GUID -toscreen
-        if ($script:forCounter -gt 1000)
+        if ($script:forCounter -gt $script:refreshPowerShellSessionCounter)
         {
             refreshOffice365PowerShellSession
             $script:forCounter=0
