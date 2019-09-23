@@ -6073,6 +6073,156 @@ Function resetCloudDistributionListSettings
 				}
 			}
 		}
+
+		if ( $script:originalO365GroupAcceptMessagesOnlyFromDLMembers -ne $NULL  )
+        {
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Processing accept messages on from senders or members...' -toscreen
+
+			#The group had accept only from set on other groups - add the group back.
+
+			$functionArray =  $$script:originalO365GroupAcceptMessagesOnlyFromDLMembers
+
+            foreach ( $member in $functionArray )
+            {
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Adding to send on accept messsages only from senders or members ' -toscreen
+				Write-LogInfo -LogPath $script:sLogFile $member.primarySMTPAddress -ToScreen
+
+				if ( $member.primarySMTPAddress -ne $script:onpremisesdlConfiguration.primarySMTPAddress )
+				{
+					Try
+					{
+						Write-LogInfo -LogPath $script:sLogFile -Message 'Gathering groups current accept messages from settings... ' -ToScreen
+
+						$functionGroup=(get-o365UnifiedGroup -identity $member.PrimarySMTPAddress).AcceptMessagesOnlyFromSendersorMembers  
+					}
+					Catch
+					{
+						Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+						cleanupSessions
+						Stop-Log -LogPath $script:sLogFile -ToScreen
+						Break
+					}
+					Try
+					{
+						#Add the distribution group identity to the list and then restamp the entire list.
+						#This was done because array operations @{ADD=*} did not work against this attribute.
+
+						Write-LogInfo -LogPath $script:sLogFile -Message 'Adding group to accept messages list and stamping full list on group... ' -ToScreen
+						Write-LogInfo -LogPath $script:sLogFile $member.primarySMTPAddress -ToScreen
+						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
+						$functionGroup
+						set-o365Unifiedgroup -identity $member.PrimarySMTPAddress -AcceptMessagesOnlyFromSendersorMembers $functionGroup -BypassSecurityGroupManagerCheck
+					}
+					Catch
+					{
+						Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+						cleanupSessions
+						Stop-Log -LogPath $script:sLogFile -ToScreen
+						Break
+					}
+				}
+            }
+		}
+
+		if ( $script:originalO365GroupRejectMessagesFromDLMembers -ne $NULL )
+		{
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Processing reject messages on from senders or members...' -toscreen
+
+			#The converted group had reject set on other groups - add converted group.
+
+			$functionArray = $script:originalO365GroupRejectMessagesFromDLMembers
+
+			foreach ( $member in $functionArray )
+            {
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Adding to reject messages from senders or members ' -toscreen
+				Write-LogInfo -LogPath $script:sLogFile $member.primarySMTPAddress -ToScreen
+
+				if ( $member.primarySMTPAddress -ne $script:onpremisesdlConfiguration.primarySMTPAddress )
+				{
+					Try
+					{
+						Write-LogInfo -LogPath $script:sLogFile -Message 'Gatheing groups current reject from settings... ' -ToScreen
+
+						$functionGroup=(get-o365Universalgroup -identity $member.PrimarySMTPAddress).RejectMessagesFromSendersOrMembers
+					}
+					Catch
+					{
+						Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+						cleanupSessions
+						Stop-Log -LogPath $script:sLogFile -ToScreen
+						Break
+					}
+					Try
+					{
+						#Add the group identity to the list and then restamp the entire list.
+						#This was done because array operations @{ADD=*} did not work against this attribute.
+
+						Write-LogInfo -LogPath $script:sLogFile -Message 'Adding group to reject from list and stamping full list on group... ' -ToScreen
+						Write-LogInfo -LogPath $script:sLogFile $member.primarySMTPAddress -ToScreen
+						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
+					
+						set-o365Universalgroup -identity $member.PrimarySMTPAddress -RejectMessagesFromSendersOrMembers $functionGroup
+					}
+					Catch
+					{
+						Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+						cleanupSessions
+						Stop-Log -LogPath $script:sLogFile -ToScreen
+						Break
+					}
+				}
+			}
+		}
+
+		if ( $script:originalO365GroupGrantSendOnBehalfTo -ne $NULL ) 
+        {
+			#The converted DL had send as rights to other groups - reset those groups to the migrated DL.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Processing send on behalf to...' -toscreen
+
+			$functionArray = $script:originalO365GroupGrantSendOnBehalfTo
+
+            foreach ( $member in $functionArray )
+            {
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Adding to send on behalf to '$member.primarySMTPAddress -toscreen
+				Write-LogInfo -LogPath $script:sLogFile $member.primarySMTPAddress -ToScreen
+
+				if ( $member.primarySMTPAddress -ne $script:onpremisesdlConfiguration.primarySMTPAddress )
+				{
+					Try
+					{
+						Write-LogInfo -LogPath $script:sLogFile -Message 'Gathering groups current grant sent on behalf settings... ' -ToScreen
+					
+						$functionGroup=(get-o365Universalgroup -identity $member.PrimarySMTPAddress).GrantSendOnBehalfTo
+					}
+					Catch
+					{
+						Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+						cleanupSessions
+						Stop-Log -LogPath $script:sLogFile -ToScreen
+						Break
+					}
+					Try
+					{
+						#Add the distribution group identity to the list and then restamp the entire list.
+						#This was done because array operations @{ADD=*} did not work against this attribute.
+
+						Write-LogInfo -LogPath $script:sLogFile -Message 'Adding distribution group to send on behalf and stamping full list on group... ' -ToScreen
+						Write-LogInfo -LogPath $script:sLogFile $member.primarySMTPAddress -ToScreen
+
+						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
+						set-o365Universalgroup -identity $member.PrimarySMTPAddress -GrantSendOnBehalfTo $functionGroup
+					}
+					Catch
+					{
+						Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+						cleanupSessions
+						Stop-Log -LogPath $script:sLogFile -ToScreen
+						Break
+					}
+				}
+            }
+		}
 	}
 	End 
 	{
