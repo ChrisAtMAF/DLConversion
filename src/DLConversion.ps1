@@ -5836,6 +5836,7 @@ Function resetCloudDistributionListSettings
 	{
 		[array]$functionArray = @()
 		$functionGroup=$NULL
+		[int]$functionCounter=0
 
 		Write-LogInfo -LogPath $script:sLogFile -Message '******************************************************************' -toscreen
 		Write-LogInfo -LogPath $script:sLogFile -Message 'Entering function resetCloudDistributionListSettings...' -toscreen
@@ -5884,6 +5885,15 @@ Function resetCloudDistributionListSettings
 
 						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
 						set-o365Distributiongroup -identity $member.PrimarySMTPAddress -GrantSendOnBehalfTo $functionGroup -BypassSecurityGroupManagerCheck
+
+						if ( $functionCounter -gt $script:refreshPowerShellSessionCounter )
+						{
+							refreshOffice365PowerShellSession
+						}
+						else
+						{
+							$functionCounter++	
+						}
 					}
 					Catch
 					{
@@ -5895,6 +5905,8 @@ Function resetCloudDistributionListSettings
 				}
             }
 		}
+
+		$functionCounter=0
 
         if ( $script:originalO365AcceptMessagesOnlyFromDLMembers -ne $NULL  )
         {
@@ -5934,6 +5946,15 @@ Function resetCloudDistributionListSettings
 						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
 						$functionGroup
 						set-o365Distributiongroup -identity $member.PrimarySMTPAddress -AcceptMessagesOnlyFromSendersorMembers $functionGroup -BypassSecurityGroupManagerCheck
+
+						if ( $functionCounter -gt $script:refreshPowerShellSessionCounter )
+						{
+							refreshOffice365PowerShellSession
+						}
+						else
+						{
+							$functionCounter++	
+						}
 					}
 					Catch
 					{
@@ -5945,6 +5966,8 @@ Function resetCloudDistributionListSettings
 				}
             }
 		}
+
+		$functionCounter=0
 
 		if ( $script:originalO365RejectMessagesFromDLMembers -ne $NULL )
 		{
@@ -5984,6 +6007,15 @@ Function resetCloudDistributionListSettings
 						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
 					
 						set-o365Distributiongroup -identity $member.PrimarySMTPAddress -RejectMessagesFromSendersOrMembers $functionGroup -BypassSecurityGroupManagerCheck
+
+						if ( $functionCounter -gt $script:refreshPowerShellSessionCounter )
+						{
+							refreshOffice365PowerShellSession
+						}
+						else
+						{
+							$functionCounter++	
+						}
 					}
 					Catch
 					{
@@ -5995,6 +6027,8 @@ Function resetCloudDistributionListSettings
 				}
 			}
 		}
+		
+		$functionCounter=0
 
 		if ( $script:originalO365BypassModerationFromSendersOrMembers -ne $NULL )
 		{
@@ -6036,6 +6070,15 @@ Function resetCloudDistributionListSettings
 						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
 
 						set-o365Distributiongroup -identity $member.PrimarySMTPAddress -BypassModerationFromSendersOrMembers $functionGroup -BypassSecurityGroupManagerCheck
+
+						if ( $functionCounter -gt $script:refreshPowerShellSessionCounter )
+						{
+							refreshOffice365PowerShellSession
+						}
+						else
+						{
+							$functionCounter++	
+						}
 					}
 					Catch
 					{
@@ -6047,6 +6090,9 @@ Function resetCloudDistributionListSettings
 				}
 			}
 		}
+
+		$functionCounter=0
+
 		if ( $script:originalO365ManagedBy -ne $NULL )
 		{
 			Write-LogInfo -LogPath $script:sLogFile -Message 'Processing managed by...' -toscreen
@@ -6087,6 +6133,16 @@ Function resetCloudDistributionListSettings
 						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
 
 						set-o365Distributiongroup -identity $member.PrimarySMTPAddress -ManagedBy $functionGroup -BypassSecurityGroupManagerCheck
+
+						if ( $functionCounter -gt $script:refreshPowerShellSessionCounter )
+						{
+							refreshOffice365PowerShellSession
+						}
+						else
+						{
+							$functionCounter++	
+						}
+
 					}
 					Catch
 					{
@@ -6098,6 +6154,8 @@ Function resetCloudDistributionListSettings
 				}
 			}
 		}
+
+		$functionCounter=0
 
 		if ( $script:originalO365ForwardingAddress -ne $NULL )
 		{
@@ -6122,6 +6180,15 @@ Function resetCloudDistributionListSettings
 					Write-LogInfo -LogPath $script:sLogFile $member.primarySMTPAddress -ToScreen
 					
 					set-o365Mailbox -identity $member.PrimarySMTPAddress -forwardingAddress $script:newOffice365DLConfiguration.identity
+
+					if ( $functionCounter -gt $script:refreshPowerShellSessionCounter )
+					{
+						refreshOffice365PowerShellSession
+					}
+					else
+					{
+						$functionCounter++	
+					}
 				}
 				Catch
 				{
@@ -6132,6 +6199,8 @@ Function resetCloudDistributionListSettings
 				}
 			}
 		}
+
+		$functionCounter=0
 
 		if ( $script:originalO365GroupAcceptMessagesOnlyFromDLMembers -ne $NULL  )
         {
@@ -6170,7 +6239,17 @@ Function resetCloudDistributionListSettings
 						Write-LogInfo -LogPath $script:sLogFile $member.primarySMTPAddress -ToScreen
 						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
 						$functionGroup
-						set-o365Unifiedgroup -identity $member.PrimarySMTPAddress -AcceptMessagesOnlyFromSendersorMembers $functionGroup -BypassSecurityGroupManagerCheck
+						set-o365Unifiedgroup -identity $member.PrimarySMTPAddress -AcceptMessagesOnlyFromSendersorMembers $functionGroup
+
+						if ( $functionCounter -gt $script:refreshPowerShellSessionCounter )
+						{
+							refreshOffice365PowerShellSession
+						}
+						else
+						{
+							$functionCounter++	
+						}
+
 					}
 					Catch
 					{
@@ -6182,6 +6261,8 @@ Function resetCloudDistributionListSettings
 				}
             }
 		}
+
+		$functionCounter=0
 
 		if ( $script:originalO365GroupRejectMessagesFromDLMembers -ne $NULL )
 		{
@@ -6221,6 +6302,15 @@ Function resetCloudDistributionListSettings
 						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
 					
 						set-o365Unifiedgroup -identity $member.PrimarySMTPAddress -RejectMessagesFromSendersOrMembers $functionGroup
+
+						if ( $functionCounter -gt $script:refreshPowerShellSessionCounter )
+						{
+							refreshOffice365PowerShellSession
+						}
+						else
+						{
+							$functionCounter++	
+						}
 					}
 					Catch
 					{
@@ -6232,6 +6322,8 @@ Function resetCloudDistributionListSettings
 				}
 			}
 		}
+
+		$functionCounter=0
 
 		if ( $script:originalO365GroupGrantSendOnBehalfTo -ne $NULL ) 
         {
@@ -6271,6 +6363,15 @@ Function resetCloudDistributionListSettings
 
 						$functionGroup+=$script:newOffice365DLConfiguration.primarySMTPAddress
 						set-o365Unifiedgroup -identity $member.PrimarySMTPAddress -GrantSendOnBehalfTo $functionGroup
+
+						if ( $functionCounter -gt $script:refreshPowerShellSessionCounter )
+						{
+							refreshOffice365PowerShellSession
+						}
+						else
+						{
+							$functionCounter++	
+						}
 					}
 					Catch
 					{
