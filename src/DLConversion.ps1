@@ -6333,6 +6333,72 @@ Function recordOriginalO365MultivaluedAttributes
 			Stop-Log -LogPath $script:sLogFile -ToScreen
 			Break
 		}
+		Try 
+		{
+			#Iterate through all grant send on behalf to in Office 365 groups.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all grantSendOnBehalfTo for the identity...' -toscreen
+
+			foreach ( $functionGroup in $functionAllOffice365Groups )
+			{
+				if ( $functionGroup.grantSendOnBehalfTo -eq $functionGroupIdentity )
+				{
+					Write-LogInfo -LogPath $script:sLogFile -Message $functionGroup.primarySMTPAddress -ToScreen
+					$script:originalO365GroupGrantSendOnBehalfTo+=$functionGroup
+				}
+			}	
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			#Iterate through all office 365 groups locating those that have grant send on behalf to set to the identity.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all acceptMessageOnlyFromDLMembers for the identity...' -toscreen
+
+			foreach ( $functionGroup in $functionAllOffice365Groups )
+			{
+				if ( $functionGroup.AcceptMessagesOnlyFromDLMembers -eq $functionGroupIdentity )
+				{
+					Write-LogInfo -LogPath $script:sLogFile -Message $functionGroup.primarySMTPAddress -ToScreen
+					$script:originalO365GroupAcceptMessagesOnlyFromDLMembers+=$functionGroup
+				}
+			}	
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			#Iterate through all office 365 groups locating those that have grant send on behalf to set to the identity.
+
+			Write-LogInfo -LogPath $script:sLogFile -Message 'Gather all rejectMessagesFromDLMembers for the identity...' -toscreen
+
+			foreach ( $functionGroup in $functionAllOffice365Groups )
+			{
+				if ( $functionGroup.RejectMessagesFromDLMembers -eq $functionGroupIdentity )
+				{
+					Write-LogInfo -LogPath $script:sLogFile -Message $functionGroup.primarySMTPAddress -ToScreen
+					$script:originalO365GroupRejectMessagesFromDLMembers+=$functionGroup
+				}
+			}	
+		}
+		Catch 
+		{
+			Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+			cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
 	}
 }
 
