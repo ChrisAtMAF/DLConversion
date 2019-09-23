@@ -2637,6 +2637,51 @@ Function backupO365RetainedSettings
 			Stop-Log -LogPath $script:sLogFile -ToScreen
 			Break
 		}
+		Try 
+		{
+			if ( $script:originalO365GroupGrantSendOnBehalfTo -ne $NULL )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Writing Office 365 Universal Groups Grant Send On Behalf To to XML...' -toscreen
+				$script:originalO365GroupGrantSendOnBehalfTo | Export-CLIXML -Path $script:originalO365GroupGrantSendOnBehalfToXML
+			}
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			if ( $script:originalO365GroupAcceptMessagesOnlyFromDLMembers -ne $NULL )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Writing Office 365 Universal Groups Grant Accept Messages From To to XML...' -toscreen
+				$script:originalO365GroupAcceptMessagesOnlyFromDLMembers | Export-CLIXML -Path $script:originalO365GroupAcceptMessagesFromXML
+			}
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
+		Try 
+		{
+			if ( $script:originalO365GroupRejectMessagesFromDLMembers -ne $NULL )
+			{
+				Write-LogInfo -LogPath $script:sLogFile -Message 'Writing Office 365 Universal Groups Reject Messages From To to XML...' -toscreen
+				$script:originalO365GroupRejectMessagesFromDLMembers | Export-CLIXML -Path $script:originalO365GroupRejectMessagesFromXML
+			}
+		}
+		Catch 
+		{
+            Write-LogError -LogPath $script:sLogFile -Message $_.Exception -toscreen
+            cleanupSessions
+			Stop-Log -LogPath $script:sLogFile -ToScreen
+			Break
+		}
 	}
 	End 
 	{
