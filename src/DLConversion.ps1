@@ -343,6 +343,18 @@ $script:originalO365BypassModerationFromSendersOrMembersXML=Join-Path $script:ba
 $script:originalO365ForwardingAddressXML=Join-Path $script:backupXMLPath -ChildPath $script:originalForwardingAddressXMLName
 $script:originalO365MemberOfXML=Join-Path $script:backupXMLPath -ChildPath $script:originalO365MemberOfXMLName
 
+[array]$script:originalO365GroupGrantSendOnBehalfTo = $NULL	#Array of all office 365 groups that are cloud only that contain the migrated DL as grant send on behalf to.
+[array]$script:originalO365GroupAcceptMessagesOnlyFromDLMembers = $NULL #Array of all office 365 groups that are cloud only that contain the mgirated DL as accept messages only from.
+[array]$script:originalO365GroupRejectMessagesFromDLMembers = $NULL #Array of all office 365 groups that are cloud only that contain the migrated DL as reject messages from DL members.
+
+<###ADMIN###>$script:originalO365GroupGrantSendOnBehalfToXMLName="o365GroupGrantSendOnBehalfTo.xml"
+<###ADMIN###>$script:originalO365GroupAcceptMessagesFromXMLName="o365GroupAcceptMessagesFrom.xml"
+<###ADMIN###>$script:originalO365GroupRejectMessagesFromXMLName="o365GroupRejectMessagesFrom.xml"
+
+$script:originalO365GroupGrantSendOnBehalfToXML=Join-Path $script:backupXMLPath -ChildPath $script:originalo365GroupGrantSendOnBehalfToXMLName
+$script:originalO365GroupAcceptMessagesFromXML=Join-Path $script:backupXMLPath -ChildPath $script:originalo365GroupAcceptMessagesFromXMLName
+$script:originalO365GroupRejectMessagesFromXML=Join-Path $script:backupXMLPath -ChildPath $script:originalo365GroupRejectMessagesFromXMLName
+
 
 #-----------------------------------------------------------[Functions]------------------------------------------------------------
 
