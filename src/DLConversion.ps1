@@ -5398,6 +5398,7 @@ Function resetCloudDLMemberOf
 		Write-LogInfo -LogPath $script:sLogFile -Message '******************************************************************' -toscreen
 
 		$functionGroupName = $script:newOffice365DLConfiguration.identity
+		[int]$functionCounter = 0
 	}
 	Process 
 	{
@@ -5410,6 +5411,17 @@ Function resetCloudDLMemberOf
 				Write-LogInfo -LogPath $script:sLogFile -Message "Adding '$functionGroupName' to group '$loopGroup'" -toscreen
 
 				add-o365distributionGroupMember -identity $loopGroup -member $functionGroupName
+
+				if ( $functionCounter -gt $script:refreshPowerShellSessionCounter )
+				{
+					refreshOffice365PowerShellSession
+
+					$functionCounter=0
+				}
+				else
+				{
+					$functionCounter++	
+				}
 			}
 		}
 		Catch 
