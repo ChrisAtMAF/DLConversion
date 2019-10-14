@@ -5438,7 +5438,7 @@ replicateDomainControllers
 
 #Start countdown for the period of time specified by the variable for post domain controller replication.
 
-Start-PSCountdown -Minutes 1 -Title "Waiting for domain controller replication" -Message "Waiting for domain controller replication"
+Start-PSCountdown -Minutes $script:adDomainReplicationTime -Title "Waiting for domain controller replication" -Message "Waiting for domain controller replication"
 
 Write-LogInfo -LogPath $script:sLogFile -Message "Invoking AADConnect Delta Sync Remotely" -ToScreen
 
@@ -5659,7 +5659,7 @@ if ($convertToContact -eq $TRUE)
 
 	#Start countdown for the period of time specified by the variable for post domain controller replication.
 
-	Start-PSCountdown -Minutes 1 -Title "Waiting for domain controller replication" -Message "Waiting for domain controller replication"
+	Start-PSCountdown -Minutes $script:adDomainReplicationTime -Title "Waiting for domain controller replication" -Message "Waiting for domain controller replication"
 
 	do
 	{
