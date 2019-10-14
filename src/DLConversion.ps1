@@ -5113,7 +5113,7 @@ Function resetOriginalDistributionListSettings
 
 			foreach ( $member in $functionArray )
             {
-				#Get the distribution list that had the group originall on bypass full bypass list to a variable.
+				#Get the distribution list that had the group originally on bypass full bypass list to a variable.
 
 				Write-LogInfo -LogPath $script:sLogFile -Message 'Adding forwarding Address... ' -toscreen
 				Write-LogInfo -LogPath $script:sLogFile $member.PrimarySMTPAddress -ToScreen
@@ -5451,7 +5451,7 @@ do
 {
 	if ( $script:aadconnectRetryRequired -eq $TRUE )
 	{
-		Start-PSCountdown -Minutes $script:adDomainReplicationTime -Title "Waiting for previous sync to finishn <or> allowing time for invoked sync to run" -Message "Waiting for previous sync to to finishn <or> allowing time for invoked sync to run"
+		Start-PSCountdown -Minutes $script:adDomainReplicationTime -Title "Waiting for previous sync to finish <or> allowing time for invoked sync to run" -Message "Waiting for previous sync to to finish <or> allowing time for invoked sync to run"
 	}
 	invokeADConnect	
 	$script:aadconnectRetryRequired = $TRUE	
@@ -5665,7 +5665,7 @@ if ($convertToContact -eq $TRUE)
 	{
 		if ( $script:aadconnectRetryRequired -eq $TRUE )
 		{
-			Start-PSCountdown -Minutes $script:adDomainReplicationTime -Title "Waiting for previous sync to finishn <or> allowing time for invoked sync to run" -Message "Waiting for previous sync to to finishn <or> allowing time for invoked sync to run"
+			Start-PSCountdown -Minutes $script:adDomainReplicationTime -Title "Waiting for previous sync to finish <or> allowing time for invoked sync to run" -Message "Waiting for previous sync to to finish <or> allowing time for invoked sync to run"
 		}
 		invokeADConnect	
 		$script:aadconnectRetryRequired = $TRUE	
@@ -5674,6 +5674,6 @@ if ($convertToContact -eq $TRUE)
 	$error.clear()
 }
 
-cleanupSessions  #Clean up - were outta here.
+cleanupSessions  #Clean up - we're outta here.
 
-archiveFiles	#Achive the move files so we have them for future reference.
+archiveFiles	#Archive the move files so we have them for future reference.
