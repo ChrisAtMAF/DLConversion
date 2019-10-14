@@ -226,7 +226,7 @@ $script:x500Address=$NULL
 <###ADMIN###>$script:groupOrganizationalUnit = "OU=ConvertedDL,DC=DOMAIN,DC=LOCAL" #OU to move migrated DLs too.
 <###ADMIN###>$script:adDomainController = "dcname.domain.com" #List of domain controllers in domain.
 <###ADMIN###>[int32]$script:adDomainReplicationTime = 1 #Timeout to wait and allow for ad replication.
-<###ADMIN###>[int32]$script:dlDelectionTime = 1 #Timeout to wait before rechecking for deleted DL.
+<###ADMIN###>[int32]$script:dlDeletionTime = 1 #Timeout to wait before rechecking for deleted DL.
 <###ADMIN###>$script:adDomainController = "domaincontroller.company.local"
 
 #Establish script variables to backup distribution list information.
@@ -5473,7 +5473,7 @@ do
 	if ( $script:dlDeletionRetryRequired -eq $TRUE)
 	{
 		Write-LogInfo -LogPath $script:sLogFile -Message "Wating for original DL deletion from Office 365" -ToScreen
-		Start-PSCountdown -Minutes $script:dlDelectionTime -Title "Waiting for DL deletion to process in Office 365" -Message "Waiting for DL deletion to process in Office 365"
+		Start-PSCountdown -Minutes $script:dlDeletionTime -Title "Waiting for DL deletion to process in Office 365" -Message "Waiting for DL deletion to process in Office 365"
 		$error.clear()
 	}
 	$script:dlDeletionRetryRequired = $TRUE
