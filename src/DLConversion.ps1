@@ -18,7 +18,7 @@
 
 .SYNOPSIS
 
-This script is designed to assist users in migrating distributon lists to Office 365.
+This script is designed to assist users in migrating distribution lists to Office 365.
 	  
 ************************************************************************************************
 ************************************************************************************************
@@ -35,7 +35,7 @@ Information regarding module can be found here:
 https://www.powershellgallery.com/packages/PSLogging/2.5.2
 https://9to5it.com/powershell-logging-v2-easily-create-log-files/
 
-All credits for the logging module to the owner and many thanks for allowing it's public use.
+All credits for the logging module to the owner and many thanks for allowing its public use.
 
 .DESCRIPTION
 
@@ -47,10 +47,10 @@ The script performs the following functions:
 Note:	This may require enabling basic authentication on one or more endpoints for powershell remoting.
 
 3)	Obtain the distribution list name from the command line.
-4)	Validate the DL exists on premsies.	[Hard fail if not found]
+4)	Validate the DL exists on premises.	[Hard fail if not found]
 5)	Validate the DL exists in Office 365. [Hard fail if not found]
 6)	Capture the distribution list membership on premises and validate that each recipient exists in Exchange Online [Hard fail if recipient not found]
-7)	Capture all multivalued attributs of the distribution list, convert the list to primary SMTP addresses, and validate those recipients exist in Exchange Online [Hard fail if recipient not found]
+7)	Capture all multivalued attributes of the distribution list, convert the list to primary SMTP addresses, and validate those recipients exist in Exchange Online [Hard fail if recipient not found]
 8)	Move the distribution list to a non-sync OU.
 9)	Trigger remotely a delta sync of AD connect to remove the distribution list from Exchange Online.
 10)	Validate the DL was removed from Exchange Online.
@@ -89,28 +89,28 @@ Purpose/Change: Updated group creation function to allow user override through p
 Version:        1.2
 Author:         Timothy J. McMichael
 Change Date:    September 25th, 2018
-Purpose/Change: Implemented new parameter to allow the group to be converted to a mail enabled contact.  During testing of these changes discovered that a common scenario was not accounted for.  It is possible on the multi-valued attributes that they coudl be set to the same group being migrated.   For example group MIGRATETEST only accepts messages from MIGRATETEST.
+Purpose/Change: Implemented new parameter to allow the group to be converted to a mail enabled contact.  During testing of these changes discovered that a common scenario was not accounted for.  It is possible on the multi-valued attributes that they could be set to the same group being migrated.   For example group MIGRATETEST only accepts messages from MIGRATETEST.
 In our testing code we tested to see if any groups on these attributes were already migrated - and of course the group we're migrating has not yet been migrated.
 
 Version:		1.3
 Author:			Timothy J. McMichael
 Change Date:	November 4th, 2018
-Purpose/Change:	Implemented some code changes to address some issues.  The first issue that was discovered came with the choice to convert the on premises DL to a mail enabled contacts.  If the group on prmeises was a security group...
+Purpose/Change:	Implemented some code changes to address some issues.  The first issue that was discovered came with the choice to convert the on premises DL to a mail enabled contacts.  If the group on premises was a security group...
 remove-distributionGroup is unable to remove the group unless the person executing the script was also a manager of the group.  The code was changed to implement the -bypassSecurityGroupManagerCheck which allows the executor to remove the DL.
-The script also when provisioning the mail enabled contact used to mirror as many of the DL attributes as possible.  For example, accept messages from / reject messages from etc.  When these attribute were mirrored this was fine...
+The script also when provisioning the mail enabled contact used to mirror as many of the DL attributes as possible.  For example, accept messages from / reject messages from etc.  When these attributes were mirrored this was fine...
 Until it was realized that they could adjust in the service and there was no way to mirror them back to the contact.  It made more sense to create the contact with the simple attributes - and let the message move onto the service - 
 where further decisions to implement accept / reject / grant etc could be evaluated and would then be managed and up to date.  The last change taken was to adjust the timing of creating the mail enabled contact.
-In testing with a multi-DC environment we discovered that between deleting the DL and creating the contact sometimes the AD cache was not updated - and reuslted in an error provisining the contact that SMTP addresses exist.
-Reused the one minute timout logic + dc replication between deleting the DL <and> provisioning the contact which corrected this issue.
+In testing with a multi-DC environment we discovered that between deleting the DL and creating the contact sometimes the AD cache was not updated - and resulted in an error provisioning the contact that SMTP addresses exist.
+Reused the one minute timeout logic + dc replication between deleting the DL <and> provisioning the contact which corrected this issue.
 
 Version:		1.4
 Author:			Timothy J. McMichael
 Change Date:	March 3, 2019.
-Purpose/Change:	In receiving customer feedback an interesting scenario was presented.  In versions prior to 1.4 convert to contact was not mandatory as true.  This would leave the distribution group on premises.  In recent weeks a customer performing conversions accidentally rebuilt their ad connect box, and selected the OU contacining converted groups.
-In doing so - the groups softmatched from on prmeises to the migrated cloud only distribution lists.  This resulted in the migration being undone - and old information from on premises now overwriting new information in the cloud.  The first change in this build
+Purpose/Change:	In receiving customer feedback an interesting scenario was presented.  In versions prior to 1.4 convert to contact was not mandatory as true.  This would leave the distribution group on premises.  In recent weeks a customer performing conversions accidentally rebuilt their ad connect box, and selected the OU containing converted groups.
+In doing so - the groups softmatched from on premises to the migrated cloud only distribution lists.  This resulted in the migration being undone - and old information from on premises now overwriting new information in the cloud.  The first change in this build
 was to make the convert to contact TRUE.  Customers desiring to retain the group on premises must now specify -convertToContact:$FALSE.
 
-In the build array logic the powershell session was rebuilt for each iteration.  This added time and was not necessary if the individual array items were less that 1000 objects.  We now only refresh if the array type is greater than 1000 objects.
+In the build array logic the powershell session was rebuilt for each iteration.  This added time and was not necessary if the individual array items were less than 1000 objects.  We now only refresh if the array type is greater than 1000 objects.
 
 Created a remote powershell session to the domain controller specified / now required.  This is where we will perform our work.
 
@@ -124,12 +124,12 @@ Version:		1.5
 Author:			Timothy J. McMichael
 Change Date:	May 1st, 2019.
 Purpose/Change:	In this version we correct some of operations.  For example, we update the AD calls to utilize calls that work assuming a non-alias is utilized for the group.
-Additionally new functions have been created to log information regaridng the items created.
+Additionally new functions have been created to log information regarding the items created.
 
 Version:		1.6
 Author:			Timothy J. McMichael
-Purpose/Change:	In this version we are implementing a switch that allows administrators to bypass retaining on premsies settings for the group.
-When this switch is utilized as FALSE - if the migrated group was set on any other disrtibution list on premises with permissions or is the member of another distribution group
+Purpose/Change:	In this version we are implementing a switch that allows administrators to bypass retaining on premises settings for the group.
+When this switch is utilized as FALSE - if the migrated group was set on any other distribution list on premises with permissions or is the member of another distribution group
 these settings are lost.  This increases script execution time - but also results in potentially loosing effective permissions or group memberships on premises.
 Recommendations to only utilize this switch when a simple distribution group is being migrated.
 
@@ -216,7 +216,7 @@ $script:newOffice365DLConfigurationMembership = $NULL
 [array]$script:onpremisesdlconfigurationGrantSendOnBehalfTOArray = @() #Array of psObjects that represent grant send on behalf to membership.
 [array]$script:onpremisesdlconfigurationAcceptMessagesOnlyFromSendersOrMembers = @() #Array of psObjects that represent accept messages only from senders or members membership.
 [array]$script:onpremisesdlconfigurationRejectMessagesFromSendersOrMembers = @() #Array of psObjects that represent reject messages only from senders or members membership.
-[array]$script:onPremsiesDLBypassModerationFromSendersOrMembers = @() #Array of psObjects that represent bypass moderation only from senders or members membership.
+[array]$script:onPremisesDLBypassModerationFromSendersOrMembers = @() #Array of psObjects that represent bypass moderation only from senders or members membership.
 
 $script:newOffice365DLConfiguration=$NULL
 $script:x500Address=$NULL
@@ -235,14 +235,14 @@ $script:x500Address=$NULL
 $script:archiveXMLPath = $NULL
 <###ADMIN###>$script:onpremisesdlconfigurationXMLName = "onpremisesdlConfiguration.XML" #On premises XML file name.
 <###ADMIN###>$script:office365DLXMLName = "office365DLConfiguration.XML" #Cloud XML file name.
-<###ADMIN###>$script:onPremsiesDLConfigurationMembershipXMLName = "onpremisesDLConfigurationMembership.XML"
+<###ADMIN###>$script:onPremisesDLConfigurationMembershipXMLName = "onpremisesDLConfigurationMembership.XML"
 <###ADMIN###>$script:newOffice365DLConfigurationXMLName = "newOffice365DLConfiguration.XML"
 <###ADMIN###>$script:newOffice365DLConfigurationMembershipXMLName = "newOffice365DLConfigurationMembership.XML"
-<###ADMIN###>$script:onPremisesMemberOfXMLName = "onPremsiesMemberOf.XML"
-<###ADMIN###>$script:originalGrantSendOnBehalfToXMLName="onPremsiesGrantSendOnBehalfTo.xml"
-<###ADMIN###>$script:originalAcceptMessagesFromXMLName="onPremsiesAcceptMessagesFrom.xml"
-<###ADMIN###>$script:originalManagedByXMLName="onPremsiesManagedBy.xml"
-<###ADMIN###>$script:originalRejectMessagesFromXMLName="onPremsiesRejectMessagesFrom.xml"
+<###ADMIN###>$script:onPremisesMemberOfXMLName = "onPremisesMemberOf.XML"
+<###ADMIN###>$script:originalGrantSendOnBehalfToXMLName="onPremisesGrantSendOnBehalfTo.xml"
+<###ADMIN###>$script:originalAcceptMessagesFromXMLName="onPremisesAcceptMessagesFrom.xml"
+<###ADMIN###>$script:originalManagedByXMLName="onPremisesManagedBy.xml"
+<###ADMIN###>$script:originalRejectMessagesFromXMLName="onPremisesRejectMessagesFrom.xml"
 <###ADMIN###>$script:originalBypassModerationFromSendersOrMembersXMLName="OnPremisesBypass.xml"
 <###ADMIN###>$script:originalForwardingAddressXMLName="onPremisesForwardAddress.xml"
 <###ADMIN###>$script:originalForwardingSMTPAddressXMLName="onPremisesForwardingSMTPAddress.xml"
@@ -253,7 +253,7 @@ $script:archiveXMLPath = $NULL
 <###ADMIN###>$script:onpremisesdlconfigurationGrantSendOnBehalfTOArrayXMLName = "onpremisesdlconfigurationGrant.xml"
 <###ADMIN###>$script:onpremisesdlconfigurationAcceptMessagesOnlyFromSendersOrMembersXMLName = "onpremisesdlconfigurationAccept.xml"
 <###ADMIN###>$script:onpremisesdlconfigurationRejectMessagesFromSendersOrMembersXMLName = "onpremisesdlconfigurationReject.xml" 
-<###ADMIN###>$script:onPremsiesDLBypassModerationFromSendersOrMembersXMLName = "onPremsiesDLBypass.xml"
+<###ADMIN###>$script:onPremisesDLBypassModerationFromSendersOrMembersXMLName = "onPremisesDLBypass.xml"
 
 $script:onpremisesdlconfigurationMembershipArrayXMLPath = Join-Path $script:backupXMLPath -ChildPath $script:onpremisesdlconfigurationMembershipArrayXMLName
 $script:onpremisesdlconfigurationManagedByArrayXMLPath = Join-Path $script:backupXMLPath -ChildPath $script:onpremisesdlconfigurationManagedByArrayXMLName 
@@ -261,11 +261,11 @@ $script:onpremisesdlconfigurationModeratedByArrayXMLPath = Join-Path $script:bac
 $script:onpremisesdlconfigurationGrantSendOnBehalfTOArrayXMLPath = Join-Path $script:backupXMLPath -ChildPath $script:onpremisesdlconfigurationGrantSendOnBehalfTOArrayXMLName
 $script:onpremisesdlconfigurationAcceptMessagesOnlyFromSendersOrMembersXMLPath = Join-Path $script:backupXMLPath -ChildPath $script:onpremisesdlconfigurationAcceptMessagesOnlyFromSendersOrMembersXMLName
 $script:onpremisesdlconfigurationRejectMessagesFromSendersOrMembersXMLPath = Join-Path $script:backupXMLPath -ChildPath $script:onpremisesdlconfigurationRejectMessagesFromSendersOrMembersXMLName
-$script:onPremsiesDLBypassModerationFromSendersOrMembersXMLPath = Join-Path $script:backupXMLPath -ChildPath $script:onPremsiesDLBypassModerationFromSendersOrMembersXMLName
+$script:onPremisesDLBypassModerationFromSendersOrMembersXMLPath = Join-Path $script:backupXMLPath -ChildPath $script:onPremisesDLBypassModerationFromSendersOrMembersXMLName
 
 $script:onPremisesXML = Join-Path $script:backupXMLPath -ChildPath $script:onpremisesdlconfigurationXMLName #Full path to on premises XML.
 $script:office365XML = Join-Path $script:backupXMLPath -ChildPath $script:office365DLXMLName #Full path to cloud XML.
-$script:onPremsiesMembershipXML = Join-Path $script:backupXMLPath -ChildPath $script:onPremsiesDLConfigurationMembershipXMLName
+$script:onPremisesMembershipXML = Join-Path $script:backupXMLPath -ChildPath $script:onPremisesDLConfigurationMembershipXMLName
 $script:newOffice365XML = Join-Path $script:backupXMLPath -ChildPath $script:newOffice365DLConfigurationXMLName
 $script:newOffice365MembershipXML = Join-Path $script:backupXMLPath -ChildPath $script:newOffice365DLConfigurationMembershipXMLName
 $script:onPremisesMemberOfXML = Join-Path $script:backupXMLPath -ChildPath $script:onPremisesMemberOfXMLName
@@ -812,7 +812,7 @@ Function removeOnPremisesPowershellSession
 
 	Begin 
 	{
-		Write-LogInfo -LogPath $script:sLogFile -Message 'This function removes the On-Premsies powershell sessions....' -toscreen
+		Write-LogInfo -LogPath $script:sLogFile -Message 'This function removes the On-Premises powershell sessions....' -toscreen
 	}
 	Process 
 	{
@@ -1404,7 +1404,7 @@ Function importOffice365PowershellSession
 <#
 *******************************************************************************************************
 
-Function collectOnPremsiesDLConfiguration
+Function collectOnPremisesDLConfiguration
 
 .DESCRIPTION
 
@@ -1425,7 +1425,7 @@ NONE
 *******************************************************************************************************
 #>
 
-Function collectOnPremsiesDLConfiguration
+Function collectOnPremisesDLConfiguration
 {
 	Param ()
 
@@ -1665,7 +1665,7 @@ Function performOffice365SafetyCheck
 .DESCRIPTION
 
 This funciton reviews the settings of the cloud DL for dir sync status.
-If dir sync is not true - assume DL specified exsits on premsies and in the cloud with same address.
+If dir sync is not true - assume DL specified exsits on premises and in the cloud with same address.
 This would indicated either direct cloud DL creation <or> migrated previously.
 
 .PARAMETER <Parameter_Name>
@@ -1747,7 +1747,7 @@ Function backupOnPremisesDLConfiguration
 
 	Begin 
 	{
-	    Write-LogInfo -LogPath $script:sLogFile -Message 'This function writes the on prmeises distribution list configuration to XML....' -toscreen
+	    Write-LogInfo -LogPath $script:sLogFile -Message 'This function writes the on premises distribution list configuration to XML....' -toscreen
 	}
 	Process 
 	{
@@ -2303,9 +2303,9 @@ Function backupOnPremisesDLArrays
 		}
 		Try 
 		{
-			if ( $script:onPremsiesDLBypassModerationFromSendersOrMembers -ne $NULL )
+			if ( $script:onPremisesDLBypassModerationFromSendersOrMembers -ne $NULL )
 			{
-				$script:onPremsiesDLBypassModerationFromSendersOrMembers | Export-CLIXML -Path $script:onPremsiesDLBypassModerationFromSendersOrMembersXMLPath
+				$script:onPremisesDLBypassModerationFromSendersOrMembers | Export-CLIXML -Path $script:onPremisesDLBypassModerationFromSendersOrMembersXMLPath
 			}
 		}
 		Catch 
@@ -2421,13 +2421,13 @@ Function backupOnPremisesdlMembership
 
 	Begin 
 	{
-	    Write-LogInfo -LogPath $script:sLogFile -Message 'This function writes the on prmeises distribution list membership configuration to XML....' -toscreen
+	    Write-LogInfo -LogPath $script:sLogFile -Message 'This function writes the on premises distribution list membership configuration to XML....' -toscreen
 	}
 	Process 
 	{
 		Try 
 		{
-            $script:onpremisesdlconfigurationMembership | Export-CLIXML -Path $script:onPremsiesMembershipXML
+            $script:onpremisesdlconfigurationMembership | Export-CLIXML -Path $script:onPremisesMembershipXML
 		}
 		Catch 
 		{
@@ -2590,7 +2590,7 @@ Function buildMembershipArray
 		{
 			$functionArray = $script:onpremisesdlConfiguration.RejectMessagesFromSendersOrMembers
 		}
-		elseif ($arrayName -eq "onPremsiesDLBypassModerationFromSendersOrMembers")
+		elseif ($arrayName -eq "onPremisesDLBypassModerationFromSendersOrMembers")
 		{
 			$functionArray = $script:onpremisesdlConfiguration.BypassModerationFromSendersOrMembers
 		}
@@ -2857,11 +2857,11 @@ Function buildMembershipArray
 				Write-LogInfo -LogPath $script:sLogFile -Message $member.PrimarySMTPAddressOrUPN -ToScreen
 			}
 		}
-		elseif ($arrayName -eq "onPremsiesDLBypassModerationFromSendersOrMembers")
+		elseif ($arrayName -eq "onPremisesDLBypassModerationFromSendersOrMembers")
 		{
-			$script:onPremsiesDLBypassModerationFromSendersOrMembers = $functionOutput
+			$script:onPremisesDLBypassModerationFromSendersOrMembers = $functionOutput
 
-			foreach ( $member in $script:onPremsiesDLBypassModerationFromSendersOrMembers)
+			foreach ( $member in $script:onPremisesDLBypassModerationFromSendersOrMembers)
 			{
 				Write-LogInfo -LogPath $script:sLogFile -Message 'The following SMTP address was added to the array:' -ToScreen
 				Write-LogInfo -LogPath $script:sLogFile -Message $member.PrimarySMTPAddressOrUPN -ToScreen
@@ -4157,7 +4157,7 @@ Function createOnPremisesDynamicDistributionGroup
 	{
 		Write-LogInfo -LogPath $script:sLogFile -Message '******************************************************************' -toscreen
 		Write-LogInfo -LogPath $script:sLogFile -Message 'Entering function createOnPremisesDynamicDistributionGroup...' -toscreen
-		Write-LogInfo -LogPath $script:sLogFile -Message 'This function creates the on premsies mail enabled contact to replace the distribution group.' -toscreen
+		Write-LogInfo -LogPath $script:sLogFile -Message 'This function creates the on premises mail enabled contact to replace the distribution group.' -toscreen
 		Write-LogInfo -LogPath $script:sLogFile -Message '******************************************************************' -toscreen
 
 		$functionEmailAddressSplit = $script:onpremisesdlConfiguration.primarySMTPAddress.split("@")
@@ -5184,7 +5184,7 @@ importOnPremisesPowershellSession  #Function call to import the on premises powe
 
 importOffice365PowershellSession  #Function call to import the Office 365 powershell session.
 
-collectOnPremsiesDLConfiguration  #Function call to gather the on premises DL information.
+collectOnPremisesDLConfiguration  #Function call to gather the on premises DL information.
 
 collectOffice365DLConfiguation  #Function call to gather the Office 365 DL information.
 
@@ -5401,7 +5401,7 @@ Write-LogInfo -LogPath $script:sLogFile -Message "Begin processing BypassModerat
 
 if ( $script:onpremisesdlConfiguration.BypassModerationFromSendersOrMembers -ne $NULL)
 {
-    buildMembershipArray ( "BypassModerationFromSendersOrMembers") ( "onPremsiesDLBypassModerationFromSendersOrMembers" )
+    buildMembershipArray ( "BypassModerationFromSendersOrMembers") ( "onPremisesDLBypassModerationFromSendersOrMembers" )
     
     if ( $script:onpremisesdlConfiguration.BypassModerationFromSendersOrMembership.count -gt 1000 )
 	{
@@ -5410,7 +5410,7 @@ if ( $script:onpremisesdlConfiguration.BypassModerationFromSendersOrMembers -ne 
 
 	$script:arrayCounter=0
 
-	foreach ($member in $script:onPremsiesDLBypassModerationFromSendersOrMembers)
+	foreach ($member in $script:onPremisesDLBypassModerationFromSendersOrMembers)
 	{
 		testOffice365Recipient ($member.PrimarySMTPAddressOrUPN) ($member.RecipientorUser)
 
@@ -5422,7 +5422,7 @@ if ( $script:onpremisesdlConfiguration.BypassModerationFromSendersOrMembers -ne 
 			}
 		}
 
-		$script:onPremsiesDLBypassModerationFromSendersOrMembers[$script:arrayCounter].GUID = $script:arrayGUID
+		$script:onPremisesDLBypassModerationFromSendersOrMembers[$script:arrayCounter].GUID = $script:arrayGUID
 
 		$script:arrayCounter+=1
 	}
@@ -5571,9 +5571,9 @@ if ( $script:onpremisesdlconfigurationRejectMessagesFromSendersOrMembers -ne $nu
 	}
 }
 
-if ( $script:onPremsiesDLBypassModerationFromSendersOrMembers -ne $NULL )
+if ( $script:onPremisesDLBypassModerationFromSendersOrMembers -ne $NULL )
 {
-	foreach ($member in $script:onPremsiesDLBypassModerationFromSendersOrMembers )
+	foreach ($member in $script:onPremisesDLBypassModerationFromSendersOrMembers )
 	{
 		Write-Loginfo -LogPath $script:sLogFile -Message "Processing Bypass Moderation From Senders Or Members member to Office 365..." -toscreen
 		Write-LogInfo -LogPath $script:sLogFile -Message $member.PrimarySMTPAddressOrUPN -toscreen
@@ -5624,7 +5624,7 @@ if ($convertToContact -eq $TRUE)
 		backupOnPremisesMultiValuedAttributes
 	}
 	
-	#Remove the on prmeises distribution list that was converted.
+	#Remove the on premises distribution list that was converted.
 
 	removeOnPremisesDistributionGroup
 
