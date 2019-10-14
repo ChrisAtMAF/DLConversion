@@ -2371,7 +2371,7 @@ Function archiveFiles
 	{
 		Try 
 		{
-			rename-item –path $script:sLogPath –newname $script:archiveXMLPath
+			rename-item -path $script:sLogPath -newname $script:archiveXMLPath
 		}
 		Catch 
 		{
