@@ -5192,9 +5192,9 @@ Function createAndUpdateMailOnMicrosoftAddress
 
 		$functionContactRemoteAddress = $functionContactRemoteAddress -split "@"
 
-		$functionContactRemoteAddress = $functionContactRemoteAddress -split "\."
+		$functionContactRemoteAddressDomain = $functionContactRemoteAddress[1] -split "\."
 
-		$script:remoteRoutingAddress = $functionContactRemoteAddress[0] + "@" + $functionContactRemoteAddress[1] + ".mail." + $functionContactRemoteAddress[2] + "." + $functionContactRemoteAddress[3]
+		$script:remoteRoutingAddress = $functionContactRemoteAddress[0] + "@" + $functionContactRemoteAddressDomain[0] + ".mail." + $functionContactRemoteAddressDomain[1] + "." + $functionContactRemoteAddressDomain[2]
 
 		$script:remoteRoutingAddress = $script:remoteRoutingAddress.ToLower()
 	}
